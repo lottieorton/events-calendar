@@ -2,4 +2,8 @@
 
 @theme {
   --font-sans: "Nunito", sans-serif;
+  --font-main: "Inter", sans-serif;
+  --color-d-purple: #44313c;
+  --color-pale-purple: #8a737d;
+  --color-d-pink: #c84d69;
 }
