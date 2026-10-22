@@ -5,5 +5,9 @@
   --font-main: "Inter", sans-serif;
   --color-d-purple: #44313c;
   --color-pale-purple: #8a737d;
-  --color-d-pink: #c84d69;
+  --color-bright-pink: #f8d8e0;
+  --color-secondary: #c84d69;
+  --color-border: #eedde1;
+  --breakpoint-3xl: 140rem;
+  --aspect-card: 10 / 9;
 }

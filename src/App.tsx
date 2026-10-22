@@ -4,7 +4,7 @@ import Calendar from "./components/Calendar/Calendar";
 
 function App() {
   return (
-    <main className="flex flex-col h-14 bg-linear-to-r from-[#fae8e9] to-[#fcf1dc] min-h-screen p-4 gap-3">
+    <main className="flex flex-col bg-linear-to-r from-bright-pink/60 to-[#fcf1dc] min-h-screen">
       <Header />
       <Calendar />
     </main>
