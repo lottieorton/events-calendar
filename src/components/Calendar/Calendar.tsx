@@ -17,6 +17,8 @@ import {
   subDays,
   toDate,
 } from "date-fns";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
 
 export default function Calendar() {
   const [selectedDate, setSelectedDate] = useState<Date>(
@@ -63,20 +65,14 @@ export default function Calendar() {
               updateDates(startOfMonth(subDays(startOfMonth(selectedDate), 1)))
             }
           >
-            <i
-              className="fa-solid fa-angle-left text-d-purple"
-              aria-label="Previous Month"
-            ></i>
+            <FontAwesomeIcon icon={faAngleLeft} aria-label="Previous Month" />
           </Button>
           <Button
             handleClick={() =>
               updateDates(addDays(endOfMonth(selectedDate), 1))
             }
           >
-            <i
-              className="fa-solid fa-angle-right text-d-purple"
-              aria-label="Next Month"
-            ></i>
+            <FontAwesomeIcon icon={faAngleRight} aria-label="Next Month" />
           </Button>
         </div>
       </div>
