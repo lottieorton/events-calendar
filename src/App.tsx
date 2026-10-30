@@ -1,5 +1,5 @@
 import "./App.css";
-import Header from "./components/Header/Header";
+import Header from "./ui/components/Header/Header";
 import Calendar from "./components/Calendar/Calendar";
 
 function App() {

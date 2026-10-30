@@ -1,5 +1,5 @@
-import { isSameDay, isSameMonth } from "date-fns";
-import DateCard from "../../DateCard/DateCard";
+import DateCard, { type DateCardVariant } from "../../DateCard/DateCard";
+import { isDaySame, isMonthSame } from "../../../lib/utils/date-utils";
 
 interface CalendarViewProps {
   calendarDates: Date[];
@@ -27,13 +27,19 @@ export default function CalendarView({
       </div>
       <div className="grid grid-cols-7 justify-items-center gap-1 md:gap-0 md:border md:border-border">
         {calendarDates.map((d) => {
+          let variant: DateCardVariant = isMonthSame(d, selectedDate)
+            ? "current"
+            : "adjacent";
+          if (isDaySame(d, selectedDate)) {
+            variant = "selected";
+          }
+
           return (
             <DateCard
+              variant={variant}
               date={d}
-              isSelected={isSameDay(d, selectedDate)}
               key={d.toDateString()}
               handleClick={() => updateDates(d)}
-              isCurrentMonth={isSameMonth(d, selectedDate)}
             />
           );
         })}

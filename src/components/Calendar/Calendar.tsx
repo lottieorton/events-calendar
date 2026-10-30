@@ -1,49 +1,27 @@
 import { useEffect, useState } from "react";
-import {
-  eachDayOfInterval,
-  endOfMonth,
-  isMonday,
-  isSameMonth,
-  isSunday,
-  nextSunday,
-  previousMonday,
-  startOfDay,
-  startOfMonth,
-} from "date-fns";
 import CalendarView from "./CalendarView/CalendarView";
 import CalendarControls from "./CalendarControls/CalendarControls";
+import {
+  getCalendarDates,
+  getStartOfDay,
+  isMonthSame,
+} from "../../lib/utils/date-utils";
 
 export default function Calendar() {
   const [selectedDate, setSelectedDate] = useState<Date>(
-    startOfDay(new Date()),
+    getStartOfDay(new Date()),
   );
   const [calendarDates, setCalendarDates] = useState<Date[]>([]);
 
-  const getCalendarDates = (date: Date): void => {
-    let startOfCalendar = startOfMonth(date);
-    let endOfCalendar = endOfMonth(date);
-    if (!isMonday(startOfCalendar)) {
-      startOfCalendar = previousMonday(startOfCalendar);
-    }
-    if (!isSunday(endOfCalendar)) {
-      endOfCalendar = nextSunday(endOfCalendar);
-    }
-    const dates = eachDayOfInterval({
-      start: startOfCalendar,
-      end: endOfCalendar,
-    });
-    setCalendarDates(dates);
-  };
-
   const updateDates = (date: Date) => {
-    if (!isSameMonth(date, selectedDate)) {
-      getCalendarDates(date);
+    if (!isMonthSame(date, selectedDate)) {
+      setCalendarDates(getCalendarDates(date));
     }
     setSelectedDate(date);
   };
 
   useEffect(() => {
-    getCalendarDates(new Date());
+    setCalendarDates(getCalendarDates(new Date()));
   }, []);
 
   return (
