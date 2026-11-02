@@ -1,5 +1,4 @@
-import Button from "../../../ui/components/Button/Button";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import IconButton from "../../../ui/components/IconButton/IconButton";
 import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import TextButton from "../../../ui/components/TextButton/TextButton";
 import DateForm from "../../DateForm/DateForm";
@@ -26,16 +25,16 @@ export default function CalendarControls({
           {toMonthYear(selectedDate)}
         </h1>
         <div className="flex gap-2 items-center">
-          <Button
+          <IconButton
+            icon={faAngleLeft}
+            label="Previous Month"
             handleClick={() => updateDates(getStartOfPrevMonth(selectedDate))}
-          >
-            <FontAwesomeIcon icon={faAngleLeft} aria-label="Previous Month" />
-          </Button>
-          <Button
+          />
+          <IconButton
+            icon={faAngleRight}
+            label="Next Month"
             handleClick={() => updateDates(getStartOfNextMonth(selectedDate))}
-          >
-            <FontAwesomeIcon icon={faAngleRight} aria-label="Next Month" />
-          </Button>
+          />
         </div>
       </div>
       <div className="flex justify-between items-center">

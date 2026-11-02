@@ -19,7 +19,10 @@ export default function CalendarView({
       <div className="grid grid-cols-7 gap-2 justify-items-center">
         {days.map((d) => {
           return (
-            <p className="text-xs text-pale-purple font-semibold 3xl:text-base">
+            <p
+              className="text-xs text-pale-purple font-semibold 3xl:text-base"
+              key={d}
+            >
               {d}
             </p>
           );
