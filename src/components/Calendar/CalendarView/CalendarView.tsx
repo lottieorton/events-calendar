@@ -15,7 +15,7 @@ export default function CalendarView({
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
-    <article className="flex flex-col p-4 gap-2 bg-stone-50 rounded-3xl border border-border md:p-6">
+    <article className="flex flex-col self-center w-full max-w-240 p-4 gap-2 bg-stone-50 rounded-3xl border border-border md:p-6 lg:border-0 lg:p-2">
       <div className="grid grid-cols-7 gap-2 justify-items-center">
         {days.map((d) => {
           return (
