@@ -7,12 +7,12 @@ const variantClasses: Record<DateCardVariant, string> = {
 };
 
 interface DateCardProps {
-  variant: DateCardVariant;
+  variant?: DateCardVariant;
   date: Date;
   handleClick: () => void;
 }
 
-export default function DayCard({
+export default function DateCard({
   variant = "current",
   date,
   handleClick,
