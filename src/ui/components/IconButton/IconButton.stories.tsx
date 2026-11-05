@@ -10,7 +10,7 @@ const meta = {
   args: {
     icon: faAngleRight,
     label: "Next",
-    handleClick: fn(),
+    onClick: fn(),
   },
 } satisfies Meta<typeof IconButton>;
 

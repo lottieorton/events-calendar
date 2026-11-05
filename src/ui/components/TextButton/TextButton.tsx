@@ -10,7 +10,7 @@ const variantClasses: Record<TextButtonVariant, string> = {
 
 interface TextButtonProps extends Omit<ComponentProps<"button">, "className"> {
   children: ReactNode;
-  handleClick: () => void;
+  onClick: () => void;
   type?: "button" | "submit";
   variant?: TextButtonVariant;
 }
@@ -18,14 +18,16 @@ interface TextButtonProps extends Omit<ComponentProps<"button">, "className"> {
 export default function TextButton({
   variant = "primary",
   children,
-  handleClick,
+  onClick,
   type = "button",
+  ...rest
 }: TextButtonProps) {
   return (
     <button
-      onClick={() => handleClick()}
+      onClick={() => onClick()}
       type={type}
       className={`rounded-full py-2 px-3 text-sm font-medium cursor-pointer 3xl:text-lg ${variantClasses[variant]}`}
+      {...rest}
     >
       {children}
     </button>

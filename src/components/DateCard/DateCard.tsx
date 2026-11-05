@@ -9,19 +9,20 @@ const variantClasses: Record<DateCardVariant, string> = {
 interface DateCardProps {
   variant?: DateCardVariant;
   date: Date;
-  handleClick: () => void;
+  onClick: () => void;
 }
 
 export default function DateCard({
   variant = "current",
   date,
-  handleClick,
+  onClick,
 }: DateCardProps) {
   const selectedNum = "bg-secondary text-white";
 
   return (
     <button
-      onClick={() => handleClick()}
+      onClick={() => onClick()}
+      type="button"
       className={`font-main flex items-start md:border md:border-border p-2 text-sm text-center ${variantClasses[variant]} rounded-xl cursor-pointer hover:bg-bright-pink md:rounded-none md:w-full md:aspect-square md:text-left lg:aspect-card 3xl:text-xl`}
     >
       <p

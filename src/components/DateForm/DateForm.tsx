@@ -14,6 +14,7 @@ export default function DateForm({ selectedDate, onChange }: DateFormProps) {
         value={toISODateString(selectedDate)}
         onChange={(e) => onChange(e.target.value)}
         className="bg-stone-50 text-sm text-d-purple p-2 rounded-3xl border border-border 3xl:text-lg 3xl:p-3"
+        aria-label="Select date"
       />
     </form>
   );

@@ -8,7 +8,7 @@ const meta = {
   tags: ["autodocs"],
   args: {
     date: new Date("11/01/2026"),
-    handleClick: fn(),
+    onClick: fn(),
   },
   decorators: [
     (Story) => (
@@ -50,17 +50,17 @@ export const Variants: Story = {
       <DateCard
         variant="current"
         date={new Date("11/01/2026")}
-        handleClick={fn()}
+        onClick={fn()}
       />
       <DateCard
         variant="selected"
         date={new Date("11/02/2026")}
-        handleClick={fn()}
+        onClick={fn()}
       />
       <DateCard
         variant="adjacent"
         date={new Date("11/03/2026")}
-        handleClick={fn()}
+        onClick={fn()}
       />
     </div>
   ),

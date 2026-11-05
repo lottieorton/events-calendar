@@ -28,12 +28,12 @@ export default function CalendarControls({
           <IconButton
             icon={faAngleLeft}
             label="Previous Month"
-            handleClick={() => updateDates(getStartOfPrevMonth(selectedDate))}
+            onClick={() => updateDates(getStartOfPrevMonth(selectedDate))}
           />
           <IconButton
             icon={faAngleRight}
             label="Next Month"
-            handleClick={() => updateDates(getStartOfNextMonth(selectedDate))}
+            onClick={() => updateDates(getStartOfNextMonth(selectedDate))}
           />
         </div>
       </div>
@@ -42,10 +42,7 @@ export default function CalendarControls({
           selectedDate={selectedDate}
           onChange={(dateString) => updateDates(stringToDate(dateString))}
         />
-        <TextButton
-          variant="secondary"
-          handleClick={() => updateDates(new Date())}
-        >
+        <TextButton variant="secondary" onClick={() => updateDates(new Date())}>
           Today
         </TextButton>
       </div>

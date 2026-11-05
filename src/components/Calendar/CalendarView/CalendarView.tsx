@@ -42,7 +42,7 @@ export default function CalendarView({
               variant={variant}
               date={d}
               key={d.toDateString()}
-              handleClick={() => updateDates(d)}
+              onClick={() => updateDates(d)}
             />
           );
         })}

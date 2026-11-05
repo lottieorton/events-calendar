@@ -8,7 +8,7 @@ const meta = {
   tags: ["autodocs"],
   args: {
     children: "Add Event",
-    handleClick: fn(),
+    onClick: fn(),
   },
 } satisfies Meta<typeof TextButton>;
 export default meta;
