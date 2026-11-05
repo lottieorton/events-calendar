@@ -8,15 +8,15 @@ import {
   isSameMonth,
   isSunday,
   nextSunday,
+  parse,
   previousMonday,
   startOfDay,
   startOfMonth,
   subDays,
-  toDate,
 } from "date-fns";
 
 export const stringToDate = (d: string): Date => {
-  return toDate(d);
+  return parse(d, "yyyy-MM-dd", new Date());
 };
 
 export const toISODateString = (date: Date): string => {
