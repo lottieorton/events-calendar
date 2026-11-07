@@ -21,7 +21,7 @@ export default function CalendarControls({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-between">
-        <h1 className="font-sans text-d-purple text-2xl font-extrabold 3xl:text-3xl">
+        <h1 className="text-d-purple text-2xl font-extrabold 3xl:text-3xl">
           {toMonthYear(selectedDate)}
         </h1>
         <div className="flex gap-2 items-center">

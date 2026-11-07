@@ -4,9 +4,11 @@ import {
   getCalendarDates,
   getStartOfDay,
   isMonthSame,
+  doesEventOverlapDate,
 } from "../../lib/utils/date-utils";
 import userEvent from "@testing-library/user-event";
 import { toast } from "react-toastify";
+import type { DateWithEvents } from "../../features/events/types";
 
 vi.mock("./CalendarControls/CalendarControls", () => {
   return {
@@ -39,7 +41,7 @@ vi.mock("./CalendarView/CalendarView", () => {
       selectedDate,
       updateDates,
     }: {
-      calendarDates: Date[];
+      calendarDates: DateWithEvents[];
       selectedDate: Date;
       updateDates: (date: Date) => void;
     }) => (
@@ -48,9 +50,12 @@ vi.mock("./CalendarView/CalendarView", () => {
           aria-label="MockCalendarView"
           onClick={() => updateDates(new Date("2026-12-05"))}
         >{`${selectedDate.toDateString()}`}</button>
-        {calendarDates.map((d) => {
-          return <p key={d.toDateString()}>{d.toDateString()}</p>;
-        })}
+        {calendarDates.map((d) => (
+          <div key={d.day.toDateString()} data-testid="date-cell">
+            <p>{d.day.toDateString()}</p>
+            <span data-testid="event-count">{d.events.length}</span>
+          </div>
+        ))}
       </>
     ),
   };
@@ -60,6 +65,7 @@ vi.mock("../../lib/utils/date-utils", () => ({
   getCalendarDates: vi.fn(),
   getStartOfDay: vi.fn(),
   isMonthSame: vi.fn(),
+  doesEventOverlapDate: vi.fn(),
 }));
 
 vi.mock("react-toastify", () => ({
@@ -78,11 +84,23 @@ describe("Calendar", () => {
     new Date("2026-11-06"),
     new Date("2026-11-07"),
   ];
-  vi.mocked(getStartOfDay).mockReturnValue(new Date());
+
+  const mockToday = new Date(2026, 10, 6, 8, 0, 0);
+  vi.mocked(getStartOfDay).mockReturnValue(mockToday);
   vi.mocked(getCalendarDates).mockReturnValue(mockCalendarDates);
+  vi.mocked(doesEventOverlapDate).mockReturnValue(true);
+
+  beforeAll(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(mockToday);
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterAll(() => {
+    vi.useRealTimers();
   });
 
   it("Should set selected date as current day by default", () => {
@@ -94,16 +112,11 @@ describe("Calendar", () => {
     const calendarViewDate = screen.getByRole("button", {
       name: "MockCalendarView",
     });
-    const currentDate = new Date();
-    const currentDateString = currentDate.toISOString().substring(0, 10);
-    const dateCalled = vi
-      .mocked(getStartOfDay)
-      .mock.calls[0][0].toISOString()
-      .substring(0, 10);
+    const dateCalled = vi.mocked(getStartOfDay).mock.calls[0][0];
 
-    expect(dateCalled).toBe(currentDateString);
-    expect(calendarControls).toHaveTextContent(currentDate.toDateString());
-    expect(calendarViewDate).toHaveTextContent(currentDate.toDateString());
+    expect(dateCalled).toEqual(mockToday);
+    expect(calendarControls).toHaveTextContent(mockToday.toDateString());
+    expect(calendarViewDate).toHaveTextContent(mockToday.toDateString());
   });
 
   it("Should set calendar dates on component render", async () => {
@@ -115,6 +128,7 @@ describe("Calendar", () => {
       .mocked(getCalendarDates)
       .mock.calls[0][0].toISOString()
       .substring(0, 10);
+    const events = await screen.findAllByTestId("event-count");
 
     expect(dateCalled).toBe(currentDate);
     expect(calendarViewDates).toHaveLength(7);
@@ -123,6 +137,7 @@ describe("Calendar", () => {
         mockCalendarDates[i].toDateString(),
       );
     }
+    expect(events).toHaveLength(7);
   });
 
   it("Should update selected date when called with a valid date of same month from CalendarControls", async () => {

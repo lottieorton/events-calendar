@@ -26,7 +26,7 @@ export default function TextButton({
     <button
       onClick={() => onClick()}
       type={type}
-      className={`rounded-full py-2 px-3 text-sm font-medium cursor-pointer 3xl:text-lg ${variantClasses[variant]}`}
+      className={`font-main rounded-full py-2 px-3 text-sm font-medium cursor-pointer 3xl:text-lg ${variantClasses[variant]}`}
       {...rest}
     >
       {children}

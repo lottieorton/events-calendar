@@ -1,4 +1,5 @@
 import {
+  doesEventOverlapDate,
   getCalendarDates,
   getStartOfDay,
   getStartOfNextMonth,
@@ -234,5 +235,67 @@ describe("getStartOfNextMonth", () => {
     expect(result.getFullYear()).toBe(2027);
     expect(result.getMonth()).toBe(0);
     expect(result.getDate()).toBe(1);
+  });
+});
+
+describe("doesEventOverlapDate", () => {
+  it("Should return true when event is on given date", () => {
+    expect(
+      doesEventOverlapDate(
+        new Date(2026, 11, 6, 11, 0, 0),
+        new Date(2026, 11, 6, 13, 0, 0),
+        new Date(2026, 11, 6),
+      ),
+    ).toBe(true);
+  });
+
+  it("Should return true when event lies in range of multi day event", () => {
+    expect(
+      doesEventOverlapDate(
+        new Date(2026, 11, 4, 11, 0, 0),
+        new Date(2026, 11, 8, 13, 0, 0),
+        new Date(2026, 11, 6),
+      ),
+    ).toBe(true);
+  });
+
+  it("Should return false when event ends before date", () => {
+    expect(
+      doesEventOverlapDate(
+        new Date(2026, 11, 4, 11, 0, 0),
+        new Date(2026, 11, 4, 13, 0, 0),
+        new Date(2026, 11, 6),
+      ),
+    ).toBe(false);
+  });
+
+  it("Should return false when event starts after date", () => {
+    expect(
+      doesEventOverlapDate(
+        new Date(2026, 11, 8, 11, 0, 0),
+        new Date(2026, 11, 8, 13, 0, 0),
+        new Date(2026, 11, 6),
+      ),
+    ).toBe(false);
+  });
+
+  it("Should return false when event ends at the start of the given day", () => {
+    expect(
+      doesEventOverlapDate(
+        new Date(2026, 11, 5, 12, 0, 0),
+        new Date(2026, 11, 6),
+        new Date(2026, 11, 6),
+      ),
+    ).toBe(false);
+  });
+
+  it("Should return false when event starts at the end of the given day", () => {
+    expect(
+      doesEventOverlapDate(
+        new Date(2026, 11, 7),
+        new Date(2026, 11, 8),
+        new Date(2026, 11, 6),
+      ),
+    ).toBe(false);
   });
 });

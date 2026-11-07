@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import DateCard from "./DateCard";
 import { fn } from "storybook/test";
+import { makeEvent } from "../../lib/utils/test-utils";
 
 const meta = {
   title: "Components/DateCard",
@@ -9,6 +10,7 @@ const meta = {
   args: {
     date: new Date("11/01/2026"),
     onClick: fn(),
+    events: [],
   },
   decorators: [
     (Story) => (
@@ -44,6 +46,34 @@ export const Adjacent: Story = {
   },
 };
 
+export const CurrentWithEvent: Story = {
+  args: {
+    variant: "current",
+    date: new Date("11/21/2026"),
+    events: [makeEvent()],
+  },
+};
+
+export const SelectedWithEvents: Story = {
+  args: {
+    variant: "selected",
+    date: new Date("11/21/2026"),
+    events: [
+      makeEvent(),
+      makeEvent({ calendar: { id: 2, name: "Private", color: "purple" } }),
+      makeEvent({ calendar: { id: 3, name: "Work", color: "green" } }),
+    ],
+  },
+};
+
+export const AdjacentWithEvent: Story = {
+  args: {
+    variant: "adjacent",
+    date: new Date("11/21/2026"),
+    events: [makeEvent()],
+  },
+};
+
 export const Variants: Story = {
   render: () => (
     <div className="flex w-100 gap-1">
@@ -51,16 +81,41 @@ export const Variants: Story = {
         variant="current"
         date={new Date("11/01/2026")}
         onClick={fn()}
+        events={[]}
       />
       <DateCard
         variant="selected"
         date={new Date("11/02/2026")}
         onClick={fn()}
+        events={[]}
       />
       <DateCard
         variant="adjacent"
         date={new Date("11/03/2026")}
         onClick={fn()}
+        events={[]}
+      />
+      <DateCard
+        variant="current"
+        date={new Date("11/04/2026")}
+        onClick={fn()}
+        events={[makeEvent()]}
+      />
+      <DateCard
+        variant="selected"
+        date={new Date("11/05/2026")}
+        onClick={fn()}
+        events={[
+          makeEvent(),
+          makeEvent({ calendar: { id: 2, name: "Private", color: "purple" } }),
+          makeEvent({ calendar: { id: 3, name: "Work", color: "green" } }),
+        ]}
+      />
+      <DateCard
+        variant="adjacent"
+        date={new Date("11/06/2026")}
+        onClick={fn()}
+        events={[makeEvent()]}
       />
     </div>
   ),
