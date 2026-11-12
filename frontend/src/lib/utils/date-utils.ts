@@ -1,6 +1,8 @@
 import {
   addDays,
+  areIntervalsOverlapping,
   eachDayOfInterval,
+  endOfDay,
   endOfMonth,
   format,
   isMonday,
@@ -62,4 +64,15 @@ export const getStartOfPrevMonth = (date: Date): Date => {
 
 export const getStartOfNextMonth = (date: Date): Date => {
   return addDays(endOfMonth(date), 1);
+};
+
+export const doesEventOverlapDate = (
+  eventStart: Date,
+  eventEnd: Date,
+  calendarDate: Date,
+): boolean => {
+  return areIntervalsOverlapping(
+    { start: eventStart, end: eventEnd },
+    { start: startOfDay(calendarDate), end: endOfDay(calendarDate) },
+  );
 };

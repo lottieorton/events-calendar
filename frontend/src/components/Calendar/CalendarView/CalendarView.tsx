@@ -1,8 +1,9 @@
 import DateCard, { type DateCardVariant } from "../../DateCard/DateCard";
 import { isDaySame, isMonthSame } from "../../../lib/utils/date-utils";
+import type { DateWithEvents } from "../../../features/events/types";
 
 interface CalendarViewProps {
-  calendarDates: Date[];
+  calendarDates: DateWithEvents[];
   selectedDate: Date;
   updateDates: (date: Date) => void;
 }
@@ -20,7 +21,7 @@ export default function CalendarView({
         {days.map((d) => {
           return (
             <p
-              className="text-xs text-pale-purple font-semibold 3xl:text-base"
+              className="font-main text-xs text-pale-purple font-semibold 3xl:text-base"
               key={d}
             >
               {d}
@@ -29,20 +30,21 @@ export default function CalendarView({
         })}
       </div>
       <div className="grid grid-cols-7 justify-items-center gap-1 md:gap-0 md:border md:border-border">
-        {calendarDates.map((d) => {
-          let variant: DateCardVariant = isMonthSame(d, selectedDate)
+        {calendarDates.map((c) => {
+          let variant: DateCardVariant = isMonthSame(c.day, selectedDate)
             ? "current"
             : "adjacent";
-          if (isDaySame(d, selectedDate)) {
+          if (isDaySame(c.day, selectedDate)) {
             variant = "selected";
           }
 
           return (
             <DateCard
               variant={variant}
-              date={d}
-              key={d.toDateString()}
-              onClick={() => updateDates(d)}
+              date={c.day}
+              key={c.day.toDateString()}
+              onClick={() => updateDates(c.day)}
+              events={c.events}
             />
           );
         })}
