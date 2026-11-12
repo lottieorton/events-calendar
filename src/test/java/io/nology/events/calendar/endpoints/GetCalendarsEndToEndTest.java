@@ -31,8 +31,6 @@ public class GetCalendarsEndToEndTest {
         RestAssured.port = this.port;
     }
 
-    // getAll
-
     @Test 
     public void getAllCalendars_CalendarsInDB_ReturnsOKAndListOfCalendars() {
         Calendar calendar1 = new Calendar();
