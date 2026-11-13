@@ -1,4 +1,6 @@
-export type CalendarColorVariant = "purple" | "blue" | "pink" | "green";
+export const CALENDAR_COLORS = ["purple", "blue", "pink", "green"] as const;
+
+export type CalendarColorVariant = (typeof CALENDAR_COLORS)[number];
 
 export interface Calendar {
   id: number;
@@ -27,3 +29,9 @@ export const calendarVariantClasses: Record<
     iconColor: "bg-rose-400",
   },
 };
+
+export interface CalendarResponse {
+  id: number;
+  name: string;
+  color: string;
+}

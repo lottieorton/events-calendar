@@ -1,4 +1,7 @@
-import type { Calendar } from "../../features/calendars/types";
+import type {
+  Calendar,
+  CalendarResponse,
+} from "../../features/calendars/types";
 import type { DateWithEvents, Event } from "../../features/events/types";
 import { doesEventOverlapDate } from "./date-utils";
 
@@ -47,6 +50,17 @@ export const makeCalendar = (overrides: Partial<Calendar> = {}): Calendar => {
     id: 1,
     name: "Personal",
     color: "blue",
+    ...overrides,
+  };
+};
+
+export const makeCalendarResponse = (
+  overrides: Partial<CalendarResponse> = {},
+): CalendarResponse => {
+  return {
+    id: 1,
+    name: "Personal",
+    color: "BLUE",
     ...overrides,
   };
 };
