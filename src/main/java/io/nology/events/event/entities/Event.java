@@ -40,7 +40,25 @@ public class Event {
     @Column(name = "is_all_day", nullable = false)
     private Boolean isAllDay;
 
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
+
     public Event() {
+    }
+
+    public Event(String title, String description, Calendar calendar, Instant startAt, Instant endAt, Boolean isAllDay, Instant createdAt) {
+        this.title = title;
+        this.description = description;
+        this.calendar = calendar;
+        this.startAt = startAt;
+        this.endAt = endAt;
+        this.isAllDay = isAllDay;
+        this.createdAt = createdAt;
+    }
+
+    // used to set createdAt by the server
+    public Event(String title, String description, Calendar calendar, Instant startAt, Instant endAt, Boolean isAllDay) {
+        this(title, description, calendar, startAt, endAt, isAllDay, Instant.now());
     }
 
     public Long getId() {
@@ -99,5 +117,11 @@ public class Event {
         this.isAllDay = isAllDay;
     }
 
-    
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
 }

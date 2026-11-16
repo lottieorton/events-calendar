@@ -54,6 +54,7 @@ public class GetEventsEndToEndTest {
         event1.setStartAt(Instant.parse("2026-11-12T17:00:00Z"));
         event1.setEndAt(Instant.parse("2026-11-12T18:00:00Z"));
         event1.setIsAllDay(false);
+        event1.setCreatedAt(Instant.parse("2026-11-12T17:00:00Z"));
         eventRepo.saveAndFlush(event1);
 
         Event event2 = new Event();
@@ -63,6 +64,7 @@ public class GetEventsEndToEndTest {
         event2.setStartAt(LocalDate.of(2026, 11, 12).atStartOfDay(ZoneId.of("Australia/Sydney")).toInstant());
         event2.setEndAt(LocalDate.of(2026, 11, 13).atStartOfDay(ZoneId.of("Australia/Sydney")).toInstant());
         event2.setIsAllDay(true);
+        event2.setCreatedAt(LocalDate.of(2026, 11, 12).atStartOfDay(ZoneId.of("Australia/Sydney")).toInstant());
         eventRepo.saveAndFlush(event2);
 
         given().get("/events")

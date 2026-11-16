@@ -75,13 +75,6 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private Event createEvent(String title, String description, Calendar calendar, Instant startAt, Instant endAt, Boolean isAllDay) {
-        Event event = new Event();
-        event.setTitle(title);
-        event.setDescription(description);
-        event.setCalendar(calendar);
-        event.setStartAt(startAt);
-        event.setEndAt(endAt);
-        event.setIsAllDay(isAllDay);
-        return event;
+        return new Event(title, description, calendar, startAt, endAt, isAllDay);
     }
 }
