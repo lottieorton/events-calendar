@@ -62,7 +62,11 @@ describe("CalendarList", () => {
     render(<CalendarList />);
     expect(screen.getByText("Error:")).toBeInTheDocument();
     expect(screen.getByText("Failed to fetch calendars")).toBeInTheDocument();
-    expect(screen.getByText("Could not fetch calendars")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Issue fetching calendars. Please try refreshing the page.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("Should render spinner if useCalendars isLoading", () => {

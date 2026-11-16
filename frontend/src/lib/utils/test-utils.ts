@@ -2,7 +2,11 @@ import type {
   Calendar,
   CalendarResponse,
 } from "../../features/calendars/types";
-import type { DateWithEvents, Event } from "../../features/events/types";
+import type {
+  DateWithEvents,
+  Event,
+  EventResponse,
+} from "../../features/events/types";
 import { doesEventOverlapDate } from "./date-utils";
 
 export const makeEvent = (overrides: Partial<Event> = {}): Event => {
@@ -15,9 +19,9 @@ export const makeEvent = (overrides: Partial<Event> = {}): Event => {
       name: "Personal",
       color: "blue",
     },
-    start_at: new Date(2026, 10, 5, 10, 0, 0),
-    end_at: new Date(2026, 10, 5, 10, 30, 0),
-    is_all_day: false,
+    startAt: new Date(2026, 10, 5, 10, 0, 0),
+    endAt: new Date(2026, 10, 5, 10, 30, 0),
+    isAllDay: false,
     ...overrides,
   };
 };
@@ -39,7 +43,7 @@ export const makeDateEvents = (
 ): DateWithEvents[] => {
   return dateList.map((c) => {
     const filteredEvents = events.filter((e) =>
-      doesEventOverlapDate(e.start_at, e.end_at, c),
+      doesEventOverlapDate(e.startAt, e.endAt, c),
     );
     return { day: c, events: filteredEvents };
   });
@@ -61,6 +65,25 @@ export const makeCalendarResponse = (
     id: 1,
     name: "Personal",
     color: "BLUE",
+    ...overrides,
+  };
+};
+
+export const makeEventResponse = (
+  overrides: Partial<EventResponse> = {},
+): EventResponse => {
+  return {
+    id: 1,
+    title: "Hair cut",
+    description: "Go to the salon to get this sorted",
+    calendar: {
+      id: 1,
+      name: "Personal",
+      color: "BLUE",
+    },
+    startAt: new Date(2026, 10, 13, 17, 0, 0).toISOString(),
+    endAt: new Date(2026, 10, 13, 18, 0, 0).toISOString(),
+    isAllDay: false,
     ...overrides,
   };
 };

@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { getAllCalendars } from "../api/calendar-api";
 import { type ReactNode } from "react";
-import { makeCalendarResponse } from "../../../lib/utils/test-utils";
+import { makeCalendar } from "../../../lib/utils/test-utils";
 import { useCalendars } from "./calendar-hooks";
 import { renderHook, waitFor } from "@testing-library/react";
 
@@ -28,13 +28,13 @@ describe("useCalendars", () => {
     vi.clearAllMocks();
   });
 
-  const mockCalendarResponses = [
-    makeCalendarResponse(),
-    makeCalendarResponse({ id: 2, name: "Family", color: "PURPLE" }),
+  const mockCalendars = [
+    makeCalendar(),
+    makeCalendar({ id: 2, name: "Family", color: "purple" }),
   ];
 
   it("Should return calendars on successful getAllCalendars", async () => {
-    vi.mocked(getAllCalendars).mockResolvedValueOnce(mockCalendarResponses);
+    vi.mocked(getAllCalendars).mockResolvedValueOnce(mockCalendars);
 
     const { result } = renderHook(() => useCalendars(), {
       wrapper: createWrapper(),
@@ -45,7 +45,7 @@ describe("useCalendars", () => {
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
       expect(getAllCalendars).toHaveBeenCalledOnce();
-      expect(result.current.data).toEqual(mockCalendarResponses);
+      expect(result.current.data).toEqual(mockCalendars);
       expect(result.current.isLoading).toBe(false);
     });
   });

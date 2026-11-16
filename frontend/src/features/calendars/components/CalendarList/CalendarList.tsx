@@ -1,16 +1,15 @@
 import CalendarCard from "../CalendarCard/CalendarCard";
 import { useCalendars } from "../../hooks/calendar-hooks";
-import { toCalendar } from "../../utils/calendar-utils";
 import Alert from "../../../../ui/components/Alert/Alert";
 import Spinner from "../../../../ui/components/Spinner/Spinner";
 
 export default function CalendarList() {
-  const { data = [], isLoading, isError, error } = useCalendars();
+  const { data: calendars = [], isLoading, isError } = useCalendars();
 
   if (isError) {
     return (
       <Alert variant="error" title="Failed to fetch calendars">
-        {error?.message}
+        Issue fetching calendars. Please try refreshing the page.
       </Alert>
     );
   }
@@ -18,10 +17,6 @@ export default function CalendarList() {
   if (isLoading) {
     return <Spinner />;
   }
-
-  const calendars = data?.map((c) => {
-    return toCalendar(c);
-  });
 
   return (
     <section className="flex flex-col gap-2">

@@ -1,5 +1,8 @@
 import { ApiError } from "../../../lib/utils/api-error";
-import { makeCalendarResponse } from "../../../lib/utils/test-utils";
+import {
+  makeCalendar,
+  makeCalendarResponse,
+} from "../../../lib/utils/test-utils";
 import { getAllCalendars } from "./calendar-api";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -18,13 +21,18 @@ describe("getAllCalendars", () => {
     makeCalendarResponse({ id: 2, name: "Family", color: "PURPLE" }),
   ];
 
+  const mockCalendars = [
+    makeCalendar(),
+    makeCalendar({ id: 2, name: "Family", color: "purple" }),
+  ];
+
   const mockErrorResponse = {
     status: 404,
     error: "Not Found",
     message: "Something went wrong with the fetch",
   };
 
-  it("Should return an array of calendar responses on successful fetch", async () => {
+  it("Should return an array of calendars on successful fetch", async () => {
     vi.spyOn(window, "fetch").mockResolvedValueOnce({
       ok: true,
       status: 200,
@@ -33,7 +41,7 @@ describe("getAllCalendars", () => {
 
     const result = await getAllCalendars();
 
-    expect(result).toEqual(mockCalendarResponses);
+    expect(result).toEqual(mockCalendars);
     expect(fetch).toHaveBeenCalledWith(`${API_URL}/calendars`);
   });
 
