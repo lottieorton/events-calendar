@@ -1,14 +1,10 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import Calendar from "./Calendar";
-import {
-  getCalendarDates,
-  getStartOfDay,
-  isMonthSame,
-  doesEventOverlapDate,
-} from "../../lib/utils/date-utils";
 import userEvent from "@testing-library/user-event";
 import { toast } from "react-toastify";
 import type { DateWithEvents } from "../../features/events/types";
+import { useEvents } from "../../features/events/hooks/event-hooks";
+import { makeEvent } from "../../lib/utils/test-utils";
 
 vi.mock("./CalendarControls/CalendarControls", () => {
   return {
@@ -53,7 +49,10 @@ vi.mock("./CalendarView/CalendarView", () => {
         {calendarDates.map((d) => (
           <div key={d.day.toDateString()} data-testid="date-cell">
             <p>{d.day.toDateString()}</p>
-            <span data-testid="event-count">{d.events.length}</span>
+            <span
+              data-testid={`event-count: ${d.day.toDateString()}`}
+              aria-label="event-count"
+            >{`${d.events.length}`}</span>
           </div>
         ))}
       </>
@@ -61,11 +60,8 @@ vi.mock("./CalendarView/CalendarView", () => {
   };
 });
 
-vi.mock("../../lib/utils/date-utils", () => ({
-  getCalendarDates: vi.fn(),
-  getStartOfDay: vi.fn(),
-  isMonthSame: vi.fn(),
-  doesEventOverlapDate: vi.fn(),
+vi.mock("../../features/events/hooks/event-hooks", () => ({
+  useEvents: vi.fn(),
 }));
 
 vi.mock("react-toastify", () => ({
@@ -75,20 +71,22 @@ vi.mock("react-toastify", () => ({
 }));
 
 describe("Calendar", () => {
-  const mockCalendarDates = [
-    new Date("2026-11-01"),
-    new Date("2026-11-02"),
-    new Date("2026-11-03"),
-    new Date("2026-11-04"),
-    new Date("2026-11-05"),
-    new Date("2026-11-06"),
-    new Date("2026-11-07"),
+  const mockEvents = [
+    makeEvent(),
+    makeEvent({
+      id: 2,
+      title: "Clean flat",
+      calendar: { id: 2, name: "Personal", color: "purple" },
+      startAt: new Date(2026, 10, 16, 18, 0, 0),
+      endAt: new Date(2026, 10, 16, 20, 0, 0),
+    }),
+    makeEvent({
+      id: 3,
+      title: "Go to the gym",
+    }),
   ];
 
   const mockToday = new Date(2026, 10, 6, 8, 0, 0);
-  vi.mocked(getStartOfDay).mockReturnValue(mockToday);
-  vi.mocked(getCalendarDates).mockReturnValue(mockCalendarDates);
-  vi.mocked(doesEventOverlapDate).mockReturnValue(true);
 
   beforeAll(() => {
     vi.useFakeTimers({ toFake: ["Date"] });
@@ -97,6 +95,12 @@ describe("Calendar", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    vi.mocked(useEvents).mockReturnValue({
+      data: mockEvents,
+      isLoading: false,
+      isError: false,
+    } as ReturnType<typeof useEvents>);
   });
 
   afterAll(() => {
@@ -112,38 +116,28 @@ describe("Calendar", () => {
     const calendarViewDate = screen.getByRole("button", {
       name: "MockCalendarView",
     });
-    const dateCalled = vi.mocked(getStartOfDay).mock.calls[0][0];
 
-    expect(dateCalled).toEqual(mockToday);
     expect(calendarControls).toHaveTextContent(mockToday.toDateString());
     expect(calendarViewDate).toHaveTextContent(mockToday.toDateString());
   });
 
-  it("Should set calendar dates on component render", async () => {
+  it("Should set calendar dates with current calendar month by default", async () => {
     render(<Calendar />);
 
     const calendarViewDates = await screen.findAllByRole("paragraph");
-    const currentDate = new Date().toISOString().substring(0, 10);
-    const dateCalled = vi
-      .mocked(getCalendarDates)
-      .mock.calls[0][0].toISOString()
-      .substring(0, 10);
-    const events = await screen.findAllByTestId("event-count");
 
-    expect(dateCalled).toBe(currentDate);
-    expect(calendarViewDates).toHaveLength(7);
-    for (let i = 0; i < calendarViewDates.length; i++) {
-      expect(calendarViewDates[i]).toHaveTextContent(
-        mockCalendarDates[i].toDateString(),
-      );
-    }
-    expect(events).toHaveLength(7);
+    expect(calendarViewDates).toHaveLength(42);
+    expect(calendarViewDates[0]).toHaveTextContent("Mon Oct 26 2026");
+    expect(calendarViewDates[41]).toHaveTextContent("Sun Dec 06 2026");
+    expect(
+      screen.getByTestId("event-count: Thu Nov 05 2026"),
+    ).toHaveTextContent("2");
+    expect(
+      screen.getByTestId("event-count: Mon Nov 16 2026"),
+    ).toHaveTextContent("1");
   });
 
-  it("Should update selected date when called with a valid date of same month from CalendarControls", async () => {
-    vi.mocked(getStartOfDay).mockReturnValueOnce(new Date("2026-11-03"));
-    vi.mocked(isMonthSame).mockReturnValueOnce(true);
-
+  it("Should update selected date when updated with a valid date of same month", async () => {
     const user = userEvent.setup();
     render(<Calendar />);
 
@@ -151,65 +145,72 @@ describe("Calendar", () => {
       name: "MockCalendarControls",
     });
 
+    expect(calendarControlsBtn).toHaveTextContent(
+      new Date("2026-11-06").toDateString(),
+    );
+
     await user.click(calendarControlsBtn);
 
     expect(calendarControlsBtn).toHaveTextContent(
       new Date("2026-11-04").toDateString(),
     );
-    expect(vi.mocked(getCalendarDates)).toHaveBeenCalledOnce();
   });
 
-  it("Should update selected date when called with a valid date of a different month from CalendarView", async () => {
-    const newSelectedDate = new Date("2026-12-05");
-    vi.mocked(getStartOfDay).mockReturnValueOnce(newSelectedDate);
-    vi.mocked(isMonthSame).mockReturnValueOnce(false);
-
-    const mockNewCalendarDates = [
-      new Date("2026-12-01"),
-      new Date("2026-12-02"),
-      new Date("2026-12-03"),
-      new Date("2026-12-04"),
-      new Date("2026-12-05"),
-      new Date("2026-12-06"),
-      new Date("2026-12-07"),
-      new Date("2026-12-08"),
-    ];
-    vi.mocked(getCalendarDates)
-      .mockReturnValueOnce(mockCalendarDates)
-      .mockReturnValueOnce(mockNewCalendarDates);
+  it("Should not update calendar dates when new selected date chosen with a valid date of same month", async () => {
     const user = userEvent.setup();
+    render(<Calendar />);
+
+    const calendarControlsBtn = screen.getByRole("button", {
+      name: "MockCalendarControls",
+    });
+
+    expect(calendarControlsBtn).toHaveTextContent(
+      new Date("2026-11-06").toDateString(),
+    );
+
+    const calendarDates = await screen.findAllByRole("paragraph");
+    expect(calendarDates).toHaveLength(42);
+    expect(calendarDates[0]).toHaveTextContent("Mon Oct 26 2026");
+    expect(calendarDates[41]).toHaveTextContent("Sun Dec 06 2026");
+
+    await user.click(calendarControlsBtn);
+
+    expect(calendarControlsBtn).toHaveTextContent(
+      new Date("2026-11-04").toDateString(),
+    );
+    const calendarDatesCheck = await screen.findAllByRole("paragraph");
+    expect(calendarDatesCheck).toHaveLength(42);
+    expect(calendarDatesCheck[0]).toHaveTextContent("Mon Oct 26 2026");
+    expect(calendarDatesCheck[41]).toHaveTextContent("Sun Dec 06 2026");
+  });
+
+  it("Should update calendar dates when new selected date chosen with a valid date of a different month", async () => {
+    const newSelectedDate = new Date("2026-12-05");
+    const user = userEvent.setup();
+
     render(<Calendar />);
 
     const calendarViewBtn = screen.getByRole("button", {
       name: "MockCalendarView",
     });
-    const calendarViewDates = await screen.findAllByRole("paragraph");
 
-    expect(vi.mocked(getCalendarDates)).toHaveBeenCalledOnce();
-    expect(calendarViewDates).toHaveLength(7);
-    expect(calendarViewDates[0]).toHaveTextContent(
-      mockCalendarDates[0].toDateString(),
-    );
+    const calendarDates = await screen.findAllByRole("paragraph");
+    expect(calendarDates).toHaveLength(42);
+    expect(calendarDates[0]).toHaveTextContent("Mon Oct 26 2026");
+    expect(calendarDates[41]).toHaveTextContent("Sun Dec 06 2026");
 
     await user.click(calendarViewBtn);
 
     await waitFor(() => {
       expect(calendarViewBtn).toHaveTextContent(newSelectedDate.toDateString());
-      expect(vi.mocked(getCalendarDates)).toHaveBeenCalledTimes(2);
       const newCalendarViewDates = screen.getAllByRole("paragraph");
-      expect(newCalendarViewDates).toHaveLength(8);
-
-      for (let i = 0; i < newCalendarViewDates.length; i++) {
-        expect(newCalendarViewDates[i]).toHaveTextContent(
-          mockNewCalendarDates[i].toDateString(),
-        );
-      }
+      expect(newCalendarViewDates).toHaveLength(35);
+      expect(newCalendarViewDates[0]).toHaveTextContent("Mon Nov 30 2026");
+      expect(newCalendarViewDates[34]).toHaveTextContent("Sun Jan 03 2027");
     });
   });
 
   it("Should have an error notification when trying to update date with an invalid date", async () => {
-    vi.mocked(getStartOfDay).mockReturnValueOnce(new Date("2026-11-03"));
-
     const user = userEvent.setup();
     render(<Calendar />);
 
@@ -224,7 +225,78 @@ describe("Calendar", () => {
 
     expect(toast.error).toHaveBeenCalledWith("Invalid date entered");
     expect(calendarControls).toHaveTextContent(
-      new Date("2026-11-03").toDateString(),
+      new Date("2026-11-06").toDateString(),
     );
+  });
+
+  it("Should call useEvents on render", async () => {
+    render(<Calendar />);
+    expect(useEvents).toHaveBeenCalledOnce();
+  });
+
+  it("Should return an empty list of events if data returned undefined", async () => {
+    vi.mocked(useEvents).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+    } as ReturnType<typeof useEvents>);
+
+    render(<Calendar />);
+
+    const events = await screen.findAllByLabelText("event-count");
+    expect(events).toHaveLength(42);
+    events.forEach((e) => {
+      expect(e).toHaveTextContent("0");
+    });
+  });
+
+  it("Should return array of events if data returned", async () => {
+    vi.mocked(useEvents).mockReturnValue({
+      data: mockEvents,
+      isLoading: false,
+      isError: false,
+    } as ReturnType<typeof useEvents>);
+
+    render(<Calendar />);
+    const events = await screen.findAllByLabelText("event-count");
+    const daysWithEvents = events.some((e) => e.textContent !== "0");
+    expect(daysWithEvents).toBe(true);
+    expect(
+      screen.getByTestId("event-count: Thu Nov 05 2026"),
+    ).toHaveTextContent("2");
+    expect(
+      screen.getByTestId("event-count: Mon Nov 16 2026"),
+    ).toHaveTextContent("1");
+    expect(
+      screen.getByTestId("event-count: Tue Nov 17 2026"),
+    ).toHaveTextContent("0");
+  });
+
+  it("Should render an alert when fetching events errors", async () => {
+    vi.mocked(useEvents).mockReturnValue({
+      isLoading: false,
+      isError: true,
+    } as ReturnType<typeof useEvents>);
+
+    render(<Calendar />);
+    expect(screen.getByText("Error:")).toBeInTheDocument();
+    expect(screen.getByText("Failed to fetch events")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Issue fetching calendar events. Please try refreshing the page.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("Should render a spinner when loading events", async () => {
+    vi.mocked(useEvents).mockReturnValue({
+      isLoading: true,
+      isError: false,
+    } as ReturnType<typeof useEvents>);
+
+    render(<Calendar />);
+
+    const spinner = screen.getByText("Loading");
+    expect(spinner).toBeInTheDocument();
   });
 });

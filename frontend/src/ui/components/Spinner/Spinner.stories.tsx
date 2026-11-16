@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import CalendarList from "./CalendarList";
+import Spinner from "./Spinner";
 
 const meta = {
-  title: "Calendars/CalendarList",
-  component: CalendarList,
+  title: "UI/Spinner",
+  component: Spinner,
   tags: ["autodocs"],
-} satisfies Meta<typeof CalendarList>;
+} satisfies Meta<typeof Spinner>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
