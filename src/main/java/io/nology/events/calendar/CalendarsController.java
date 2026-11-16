@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.nology.events.calendar.dtos.CalendarResponse;
 import io.nology.events.calendar.entities.Calendar;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
 @RequestMapping("/calendars")
+@Tag(name = "Calendars Controller")
 public class CalendarsController {
     private final CalendarService calendarService;
 

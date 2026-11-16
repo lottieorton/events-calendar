@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.nology.events.event.dtos.EventResponse;
 import io.nology.events.event.entities.Event;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController 
 @RequestMapping("/events")
+@Tag(name = "Events Controller")
 public class EventsController {
     private final EventService eventService;
 
