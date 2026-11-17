@@ -4,47 +4,29 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.jdbc.Sql;
 
-import io.nology.events.calendar.CalendarRepository;
-import io.nology.events.calendar.entities.Calendar;
-import io.nology.events.calendar.entities.CalendarColor;
-import io.restassured.RestAssured;
+import io.nology.events.calendar.factory.CalendarTestFactory;
+import io.nology.events.config.BaseEndToEndTest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql(scripts = "/sql/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-public class GetCalendarsEndToEndTest {
-    @LocalServerPort 
-    private int port;
+@DisplayName("GET /calendars")
+public class GetCalendarsEndToEndTest extends BaseEndToEndTest {
+    
+    private final CalendarTestFactory calendarFactory;
 
-    @Autowired 
-    private CalendarRepository calendarRepo;
-
-    @BeforeEach 
-    public void setup() {
-        RestAssured.port = this.port;
+    @Autowired
+    public GetCalendarsEndToEndTest(CalendarTestFactory calendarFactory) {
+        this.calendarFactory = calendarFactory;
     }
 
     @Test 
     public void getAllCalendars_CalendarsInDB_ReturnsOKAndListOfCalendars() {
-        Calendar calendar1 = new Calendar();
-        calendar1.setName("Personal");
-        calendar1.setColor(CalendarColor.BLUE);
-        calendarRepo.saveAndFlush(calendar1);
-        Calendar calendar2 = new Calendar();
-        calendar2.setName("Family");
-        calendar2.setColor(CalendarColor.PURPLE);
-        calendarRepo.saveAndFlush(calendar2);
-        Calendar calendar3 = new Calendar();
-        calendar3.setName("Work");
-        calendar3.setColor(CalendarColor.GREEN);
-        calendarRepo.saveAndFlush(calendar3);
+        this.calendarFactory.create();
+        this.calendarFactory.create();
+        this.calendarFactory.create();
 
         given().get("/calendars")
         .then().statusCode(HttpStatus.OK.value())
