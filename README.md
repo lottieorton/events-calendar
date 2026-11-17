@@ -214,6 +214,11 @@ VITE_API_URL=http://localhost:8080
 - Consumed getAllEvents endpoint in frontend with state handling and tests
 - Configured Swagger documentation
 - Added `created_at` column to events entity, to enable easier future reporting, database updates and debugging
+- Configured GitHub Actions CI/CD pipelines for automated frontend (Vitest) and backend (Maven) testing
+
+**17/11/2026:** Test Factory implementation
+
+- Added Test Factories for both Calendar and Events for improved end-to-end testing configuration
 
 ---
 
