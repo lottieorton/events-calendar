@@ -1,6 +1,7 @@
 package io.nology.events.calendar;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,10 @@ public class CalendarService {
 
     public List<Calendar> findAll() {
         return this.repo.findAll();
+    }
+
+    public Optional<Calendar> findById(Long id) {
+        return this.repo.findById(id);
     }
     
 }

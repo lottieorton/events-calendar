@@ -5,15 +5,18 @@ import { toast } from "react-toastify";
 import type { DateWithEvents } from "../../features/events/types";
 import { useEvents } from "../../features/events/hooks/event-hooks";
 import { makeEvent } from "../../lib/utils/test-utils";
+import type { ReactNode } from "react";
 
 vi.mock("./CalendarControls/CalendarControls", () => {
   return {
     default: ({
       selectedDate,
       updateDates,
+      openModal,
     }: {
       selectedDate: Date;
       updateDates: (date: Date) => void;
+      openModal: () => void;
     }) => (
       <>
         <button
@@ -25,6 +28,9 @@ vi.mock("./CalendarControls/CalendarControls", () => {
           aria-label="MockCalendarControls-InvalidDate"
           onClick={() => updateDates(new Date("invalid-date-string"))}
         >{`${selectedDate}`}</button>
+        <button aria-label="MockCalendarControls-OpenModal" onClick={openModal}>
+          Open Modal
+        </button>
       </>
     ),
   };
@@ -59,6 +65,60 @@ vi.mock("./CalendarView/CalendarView", () => {
     ),
   };
 });
+
+vi.mock("../../ui/components/Modal/Modal", () => {
+  return {
+    default: ({
+      open,
+      title,
+      onClose,
+      children,
+    }: {
+      open: boolean;
+      title: string;
+      onClose: () => void;
+      children: ReactNode;
+    }) => {
+      if (open) {
+        return (
+          <div>
+            <button
+              data-testid="mockModal"
+              onClick={onClose}
+            >{`${title}`}</button>
+            {children}
+          </div>
+        );
+      }
+
+      return null;
+    },
+  };
+});
+
+vi.mock(
+  "../../features/events/components/CreateEventForm/CreateEventForm",
+  () => {
+    return {
+      default: ({
+        onSuccess,
+        onCancel,
+      }: {
+        onSuccess: () => void;
+        onCancel: () => void;
+      }) => (
+        <div>
+          <button data-testid="mockCreateEventFormSuccess" onClick={onSuccess}>
+            "Success
+          </button>
+          <button data-testid="mockCreateEventFormCancel" onClick={onCancel}>
+            "Cancel
+          </button>
+        </div>
+      ),
+    };
+  },
+);
 
 vi.mock("../../features/events/hooks/event-hooks", () => ({
   useEvents: vi.fn(),
@@ -298,5 +358,82 @@ describe("Calendar", () => {
 
     const spinner = screen.getByText("Loading");
     expect(spinner).toBeInTheDocument();
+  });
+
+  it("Should have modal closed by default", () => {
+    render(<Calendar />);
+
+    const modal = screen.queryByTestId("mockModal");
+    expect(modal).not.toBeInTheDocument();
+  });
+
+  it("Should open the modal when openModal is called", async () => {
+    const user = userEvent.setup();
+
+    render(<Calendar />);
+
+    const openModalBtn = screen.getByRole("button", {
+      name: "MockCalendarControls-OpenModal",
+    });
+    await user.click(openModalBtn);
+
+    const modal = screen.getByTestId("mockModal");
+    expect(modal).toBeInTheDocument();
+    expect(modal).toHaveTextContent("Create Event");
+  });
+
+  it("Should close the modal when closeModal is called from the modal", async () => {
+    const user = userEvent.setup();
+
+    render(<Calendar />);
+
+    const openModalBtn = screen.getByRole("button", {
+      name: "MockCalendarControls-OpenModal",
+    });
+    await user.click(openModalBtn);
+
+    const modalBtn = screen.getByTestId("mockModal");
+    expect(modalBtn).toBeInTheDocument();
+
+    await user.click(modalBtn);
+    expect(modalBtn).not.toBeInTheDocument();
+  });
+
+  it("Should close the modal when onSuccess is called from CreateEventForm", async () => {
+    const user = userEvent.setup();
+
+    render(<Calendar />);
+
+    const openModalBtn = screen.getByRole("button", {
+      name: "MockCalendarControls-OpenModal",
+    });
+    await user.click(openModalBtn);
+
+    const modal = screen.getByTestId("mockModal");
+    const createEventSuccessBtn = screen.getByTestId(
+      "mockCreateEventFormSuccess",
+    );
+
+    await user.click(createEventSuccessBtn);
+    expect(modal).not.toBeInTheDocument();
+  });
+
+  it("Should close the modal when onCancel is called from CreateEventForm", async () => {
+    const user = userEvent.setup();
+
+    render(<Calendar />);
+
+    const openModalBtn = screen.getByRole("button", {
+      name: "MockCalendarControls-OpenModal",
+    });
+    await user.click(openModalBtn);
+
+    const modal = screen.getByTestId("mockModal");
+    const createEventCancelBtn = screen.getByTestId(
+      "mockCreateEventFormCancel",
+    );
+
+    await user.click(createEventCancelBtn);
+    expect(modal).not.toBeInTheDocument();
   });
 });

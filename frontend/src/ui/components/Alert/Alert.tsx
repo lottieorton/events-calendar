@@ -44,11 +44,11 @@ export default function Alert({ variant, title, children }: AlertProps) {
   return (
     <div
       role={role}
-      className={`flex gap-3 rounded-xl border p-4 text-sm ${container}`}
+      className={`flex gap-3 rounded-xl border p-4 text-sm ${container} 3xl:text-xl`}
     >
       <FontAwesomeIcon
         icon={icon}
-        className={`mt-0.5 shrink-0 text-base ${iconColor}`}
+        className={`mt-0.5 shrink-0 text-base ${iconColor} 3xl:text-2xl`}
       />
       <div className="min-w-0">
         <span className="sr-only">{msgPrefix}</span>

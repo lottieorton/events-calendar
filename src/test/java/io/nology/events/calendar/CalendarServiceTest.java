@@ -21,4 +21,10 @@ public class CalendarServiceTest {
         this.calendarService.findAll();
         verify(this.repo).findAll();
     }
+
+    @Test 
+    public void findById_CallsFindById() {
+        this.calendarService.findById(1L);
+        verify(this.repo).findById(1L);
+    }
 }
