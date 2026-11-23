@@ -208,31 +208,66 @@ describe("eventFormSchema", () => {
   });
 
   describe("Refining", () => {
-    it("Should accept date ranges with startAt before endAt", () => {
+    it("Should accept date ranges with startAt before endAt when !isAllDay", () => {
       const parsed = eventFormSchema.parse({
         ...defaults,
         startAt: "2026-11-20T10:00",
         endAt: "2026-11-20T12:00",
+        isAllDay: false,
       });
       expect(parsed.endAt).toEqual(new Date(2026, 10, 20, 12, 0, 0));
     });
 
-    it("Should reject date ranges with startAt after endAt", () => {
+    it("Should reject date ranges with startAt after endAt when !isAllDay", () => {
       expect(
         messagesFor({
           startAt: new Date(2026, 10, 20, 12, 0, 0),
           endAt: new Date(2026, 10, 20, 10, 0, 0),
+          isAllDay: false,
         }),
       ).toEqual(["End at must be after the Start At date and time"]);
     });
 
-    it("Should reject dates ranges with startAt equal to endAt", () => {
+    it("Should reject date ranges with startAt equal to endAt when !isAllDay", () => {
       expect(
         messagesFor({
           startAt: new Date(2026, 10, 20, 12, 0, 0),
           endAt: new Date(2026, 10, 20, 12, 0, 0),
+          isAllDay: false,
         }),
       ).toEqual(["End at must be after the Start At date and time"]);
+    });
+
+    it("Should accept date ranges with startAt before endAt when isAllDay", () => {
+      const parsed = eventFormSchema.parse({
+        ...defaults,
+        startAt: "2026-11-20T00:00",
+        endAt: "2026-11-21T00:00",
+        isAllDay: true,
+      });
+      expect(parsed.startAt).toEqual(new Date(2026, 10, 20, 0, 0, 0));
+      expect(parsed.endAt).toEqual(new Date(2026, 10, 21, 0, 0, 0));
+    });
+
+    it("Should reject date ranges with startAt after endAt when isAllDay", () => {
+      expect(
+        messagesFor({
+          startAt: new Date(2026, 10, 20, 12, 0, 0),
+          endAt: new Date(2026, 10, 20, 10, 0, 0),
+          isAllDay: true,
+        }),
+      ).toEqual(["End at must be after the Start At date and time"]);
+    });
+
+    it("Should accept date ranges with startAt equal to endAt when isAllDay", () => {
+      const parsed = eventFormSchema.parse({
+        ...defaults,
+        startAt: "2026-11-20T00:00",
+        endAt: "2026-11-20T00:00",
+        isAllDay: true,
+      });
+      expect(parsed.startAt).toEqual(new Date(2026, 10, 20, 0, 0, 0));
+      expect(parsed.endAt).toEqual(new Date(2026, 10, 20, 0, 0, 0));
     });
   });
 });

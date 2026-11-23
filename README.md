@@ -220,6 +220,15 @@ VITE_API_URL=http://localhost:8080
 
 - Added Test Factories for both Calendar and Events for improved end-to-end testing configuration
 
+**20/11/2026:** Create Events
+
+- Implemented create events functionality across the full stack with tests
+
+**23/11/2026:** Additional create event and form features
+
+- Implemented isAllDay checked logic for the date fields in event form, additionally upadting schema logic
+- Added default values functionality and logic to create event form
+
 ---
 
 ## Further details, related projects, reimplementations

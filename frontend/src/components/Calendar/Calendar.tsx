@@ -36,7 +36,7 @@ export default function Calendar() {
     if (!isMonthSame(date, selectedDate)) {
       setCalendarDates(getCalendarDates(date));
     }
-    setSelectedDate(date);
+    setSelectedDate(getStartOfDay(date));
   };
 
   const openModal = () => setIsCreateModalOpen(true);
@@ -61,7 +61,13 @@ export default function Calendar() {
         updateDates={updateDates}
       />
       <Modal open={isCreateModalOpen} title="Create Event" onClose={closeModal}>
-        <CreateEventForm onSuccess={closeModal} onCancel={closeModal} />
+        {isCreateModalOpen && (
+          <CreateEventForm
+            onSuccess={closeModal}
+            onCancel={closeModal}
+            selectedDate={selectedDate}
+          />
+        )}
       </Modal>
     </section>
   );

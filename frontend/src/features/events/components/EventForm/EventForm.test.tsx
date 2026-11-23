@@ -2,8 +2,12 @@ import { userEvent } from "storybook/test";
 import { makeCalendar } from "../../../../lib/utils/test-utils";
 import { useCalendars } from "../../../calendars/hooks/calendar-hooks";
 import EventForm from "./EventForm";
-import { eventFormSchema, type EventFormValues } from "./schema";
-import { useForm, type Resolver } from "react-hook-form";
+import {
+  eventFormSchema,
+  type EventFormInput,
+  type EventFormValues,
+} from "./schema";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { render, screen, waitFor } from "@testing-library/react";
 
@@ -15,13 +19,16 @@ const EventFormWrapper = ({
   onSubmit,
   onCancel,
   isSubmitting = false,
+  defaultValues,
 }: {
   onSubmit: (data: EventFormValues) => Promise<void>;
   onCancel: () => void;
   isSubmitting?: boolean;
+  defaultValues?: Partial<EventFormInput>;
 }) => {
-  const methods = useForm<EventFormValues>({
-    resolver: zodResolver(eventFormSchema) as Resolver<EventFormValues>,
+  const methods = useForm<EventFormInput, any, EventFormValues>({
+    resolver: zodResolver(eventFormSchema),
+    defaultValues: defaultValues,
   });
 
   return (
@@ -33,6 +40,15 @@ const EventFormWrapper = ({
       isSubmitting={isSubmitting}
     />
   );
+};
+
+const mockDefaultValues = {
+  title: "Default title",
+  calendarId: 1,
+  description: "Default description",
+  startAt: "2026-11-23T13:00",
+  endAt: "2026-11-23T14:00",
+  isAllDay: false,
 };
 
 describe("EventForm", () => {
@@ -54,6 +70,41 @@ describe("EventForm", () => {
   const mockSubmit = vi.fn();
   const mockCancel = vi.fn();
 
+  it("Should render with default values when provided", () => {
+    const mockDefaultValues = {
+      title: "Default title",
+      calendarId: 1,
+      description: "Default description",
+      startAt: "2026-11-23T13:00",
+      endAt: "2026-11-23T14:00",
+      isAllDay: true,
+    };
+
+    render(
+      <EventFormWrapper
+        onSubmit={mockSubmit}
+        onCancel={mockCancel}
+        defaultValues={mockDefaultValues}
+      />,
+    );
+
+    const titleInput = screen.getByRole("textbox", { name: "Title *" });
+    const calendarInput = screen.getByRole("combobox", { name: "Calendar *" });
+    const descriptionInput = screen.getByRole("textbox", {
+      name: "Description",
+    });
+    const startAtInput = screen.getByLabelText("Start At *");
+    const endAtInput = screen.getByLabelText("End At *");
+    const isAllDayInput = screen.getByRole("checkbox", { name: "All-day" });
+
+    expect(titleInput).toHaveValue("Default title");
+    expect(calendarInput).toHaveValue("1");
+    expect(descriptionInput).toHaveValue("Default description");
+    expect(startAtInput).toHaveValue("2026-11-23");
+    expect(endAtInput).toHaveValue("2026-11-23");
+    expect(isAllDayInput).toBeChecked();
+  });
+
   it("Should submit the form with valid form values", async () => {
     const user = userEvent.setup();
     render(<EventFormWrapper onSubmit={mockSubmit} onCancel={mockCancel} />);
@@ -66,14 +117,12 @@ describe("EventForm", () => {
     });
     const startAtInput = screen.getByLabelText("Start At *");
     const endAtInput = screen.getByLabelText("End At *");
-    const isAllDayInput = screen.getByRole("checkbox", { name: "All-day" });
 
     await user.type(titleInput, "Test");
     await user.type(descriptionInput, "Test description");
     await user.selectOptions(calendarInput, "Family");
     await user.type(startAtInput, "2026-11-20T10:00");
     await user.type(endAtInput, "2026-11-20T11:00");
-    await user.click(isAllDayInput);
     await user.click(submitBtn);
 
     expect(mockSubmit).toHaveBeenCalledOnce();
@@ -83,7 +132,7 @@ describe("EventForm", () => {
       description: "Test description",
       startAt: new Date(2026, 10, 20, 10, 0, 0),
       endAt: new Date(2026, 10, 20, 11, 0, 0),
-      isAllDay: true,
+      isAllDay: false,
     });
   });
 
@@ -170,5 +219,226 @@ describe("EventForm", () => {
     await user.click(cancelBtn);
 
     expect(mockCancel).toHaveBeenCalled();
+  });
+
+  it("Should set startAt date to start of the day when isAllDay is true in submitted form", async () => {
+    const user = userEvent.setup();
+    render(
+      <EventFormWrapper
+        onSubmit={mockSubmit}
+        onCancel={mockCancel}
+        defaultValues={mockDefaultValues}
+      />,
+    );
+
+    const submitBtn = screen.getByRole("button", { name: "Submit" });
+    const titleInput = screen.getByRole("textbox", { name: "Title *" });
+    const startAtInput = screen.getByLabelText("Start At *");
+    const isAllDayInput = screen.getByRole("checkbox", { name: "All-day" });
+
+    expect(startAtInput).toHaveValue("2026-11-23T13:00");
+    await user.type(titleInput, "Test");
+    await user.click(isAllDayInput);
+    await user.click(submitBtn);
+
+    expect(mockSubmit).toHaveBeenCalledOnce();
+    expect(mockSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        startAt: new Date(2026, 10, 23, 0, 0, 0),
+        isAllDay: true,
+      }),
+    );
+  });
+
+  it("Should set endAt date to end of the day when isAllDay is true in submitted form", async () => {
+    const user = userEvent.setup();
+    render(
+      <EventFormWrapper
+        onSubmit={mockSubmit}
+        onCancel={mockCancel}
+        defaultValues={mockDefaultValues}
+      />,
+    );
+
+    const submitBtn = screen.getByRole("button", { name: "Submit" });
+    const titleInput = screen.getByRole("textbox", { name: "Title *" });
+    const endAtInput = screen.getByLabelText("End At *");
+    const isAllDayInput = screen.getByRole("checkbox", { name: "All-day" });
+
+    expect(endAtInput).toHaveValue("2026-11-23T14:00");
+    await user.type(titleInput, "Test");
+    await user.click(isAllDayInput);
+    await user.click(submitBtn);
+
+    expect(mockSubmit).toHaveBeenCalledOnce();
+    expect(mockSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endAt: new Date(2026, 10, 23, 23, 59, 59, 999),
+        isAllDay: true,
+      }),
+    );
+  });
+
+  it("Should render startAt and endAt fields as datetime-local when isAllDay is false", () => {
+    render(
+      <EventFormWrapper
+        onSubmit={mockSubmit}
+        onCancel={mockCancel}
+        defaultValues={mockDefaultValues}
+      />,
+    );
+
+    const startAtInput = screen.getByLabelText("Start At *");
+    const endAtInput = screen.getByLabelText("End At *");
+
+    expect(startAtInput).toHaveAttribute("type", "datetime-local");
+    expect(endAtInput).toHaveAttribute("type", "datetime-local");
+    expect(startAtInput).toHaveValue("2026-11-23T13:00");
+    expect(endAtInput).toHaveValue("2026-11-23T14:00");
+  });
+
+  it("Should render startAt and endAt fields as dates when isAllDay is true", () => {
+    const mockDefaultValues = {
+      title: "Default title",
+      calendarId: 1,
+      description: "Default description",
+      startAt: "2026-11-23",
+      endAt: "2026-11-23",
+      isAllDay: true,
+    };
+
+    render(
+      <EventFormWrapper
+        onSubmit={mockSubmit}
+        onCancel={mockCancel}
+        defaultValues={mockDefaultValues}
+      />,
+    );
+
+    const startAtInput = screen.getByLabelText("Start At *");
+    const endAtInput = screen.getByLabelText("End At *");
+
+    expect(startAtInput).toHaveAttribute("type", "date");
+    expect(endAtInput).toHaveAttribute("type", "date");
+    expect(startAtInput).toHaveValue("2026-11-23");
+    expect(endAtInput).toHaveValue("2026-11-23");
+  });
+
+  it("Should transform datetime-local values to date when isAllDay is checked", async () => {
+    const user = userEvent.setup();
+    render(
+      <EventFormWrapper
+        onSubmit={mockSubmit}
+        onCancel={mockCancel}
+        defaultValues={mockDefaultValues}
+      />,
+    );
+
+    const startAtInput = screen.getByLabelText("Start At *");
+    const endAtInput = screen.getByLabelText("End At *");
+    const isAllDayField = screen.getByRole("checkbox", { name: "All-day" });
+
+    expect(startAtInput).toHaveAttribute("type", "datetime-local");
+    expect(endAtInput).toHaveAttribute("type", "datetime-local");
+    expect(startAtInput).toHaveValue("2026-11-23T13:00");
+    expect(endAtInput).toHaveValue("2026-11-23T14:00");
+    await user.click(isAllDayField);
+
+    expect(startAtInput).toHaveAttribute("type", "date");
+    expect(endAtInput).toHaveAttribute("type", "date");
+    expect(startAtInput).toHaveValue("2026-11-23");
+    expect(endAtInput).toHaveValue("2026-11-23");
+  });
+
+  it("Should transform date values to datetime-local with timeCache value when isAllDay is unchecked", async () => {
+    const user = userEvent.setup();
+    const mockDefaultValues = {
+      title: "Default title",
+      calendarId: 1,
+      description: "Default description",
+      startAt: "2026-11-23",
+      endAt: "2026-11-23",
+      isAllDay: true,
+    };
+
+    render(
+      <EventFormWrapper
+        onSubmit={mockSubmit}
+        onCancel={mockCancel}
+        defaultValues={mockDefaultValues}
+      />,
+    );
+
+    const startAtInput = screen.getByLabelText("Start At *");
+    const endAtInput = screen.getByLabelText("End At *");
+    const isAllDayField = screen.getByRole("checkbox", { name: "All-day" });
+
+    expect(startAtInput).toHaveAttribute("type", "date");
+    expect(endAtInput).toHaveAttribute("type", "date");
+    expect(startAtInput).toHaveValue("2026-11-23");
+    expect(endAtInput).toHaveValue("2026-11-23");
+    await user.click(isAllDayField);
+
+    expect(startAtInput).toHaveAttribute("type", "datetime-local");
+    expect(endAtInput).toHaveAttribute("type", "datetime-local");
+    expect(startAtInput).toHaveValue("2026-11-23T00:00");
+    expect(endAtInput).toHaveValue("2026-11-23T01:00");
+  });
+
+  it("Should set and subsequently use the timeCache when converting from datetime-local to date and back to datetime-local", async () => {
+    const user = userEvent.setup();
+    render(
+      <EventFormWrapper
+        onSubmit={mockSubmit}
+        onCancel={mockCancel}
+        defaultValues={mockDefaultValues}
+      />,
+    );
+
+    const startAtInput = screen.getByLabelText("Start At *");
+    const endAtInput = screen.getByLabelText("End At *");
+    const isAllDayField = screen.getByRole("checkbox", { name: "All-day" });
+
+    expect(startAtInput).toHaveValue("2026-11-23T13:00");
+    expect(endAtInput).toHaveValue("2026-11-23T14:00");
+    await user.click(isAllDayField);
+
+    expect(startAtInput).toHaveValue("2026-11-23");
+    expect(endAtInput).toHaveValue("2026-11-23");
+    await user.click(isAllDayField);
+
+    expect(startAtInput).toHaveValue("2026-11-23T13:00");
+    expect(endAtInput).toHaveValue("2026-11-23T14:00");
+  });
+
+  it("Should leave dates as blank if the current startAt or endAt values are not strings", async () => {
+    const user = userEvent.setup();
+    const mockDefaultValues = {
+      title: "Default title",
+      calendarId: 1,
+      description: "Default description",
+      startAt: undefined,
+      endAt: undefined,
+      isAllDay: true,
+    };
+
+    render(
+      <EventFormWrapper
+        onSubmit={mockSubmit}
+        onCancel={mockCancel}
+        defaultValues={mockDefaultValues}
+      />,
+    );
+
+    const startAtInput = screen.getByLabelText("Start At *");
+    const endAtInput = screen.getByLabelText("End At *");
+    const isAllDayField = screen.getByRole("checkbox", { name: "All-day" });
+
+    expect(startAtInput).toHaveValue("");
+    expect(endAtInput).toHaveValue("");
+    await user.click(isAllDayField);
+
+    expect(startAtInput).toHaveValue("");
+    expect(endAtInput).toHaveValue("");
   });
 });

@@ -31,7 +31,11 @@ export const eventFormSchema = z
   })
   .refine(
     (data) => {
-      return data.startAt < data.endAt;
+      if (!data.isAllDay) {
+        return data.startAt < data.endAt;
+      } else {
+        return data.startAt <= data.endAt;
+      }
     },
     {
       message: "End at must be after the Start At date and time",
@@ -39,4 +43,6 @@ export const eventFormSchema = z
     },
   );
 
-export type EventFormValues = z.infer<typeof eventFormSchema>;
+export type EventFormValues = z.output<typeof eventFormSchema>;
+
+export type EventFormInput = z.input<typeof eventFormSchema>;

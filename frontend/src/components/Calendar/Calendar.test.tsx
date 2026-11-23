@@ -108,6 +108,10 @@ vi.mock(
         onCancel: () => void;
       }) => (
         <div>
+          <form>
+            <label htmlFor="create-event-form">Form field:</label>
+            <input id="create-event-form" />
+          </form>
           <button data-testid="mockCreateEventFormSuccess" onClick={onSuccess}>
             "Success
           </button>
@@ -167,18 +171,15 @@ describe("Calendar", () => {
     vi.useRealTimers();
   });
 
-  it("Should set selected date as current day by default", () => {
+  it("Should set selected date as the start of the current day by default", () => {
     render(<Calendar />);
 
     const calendarControls = screen.getByRole("button", {
       name: "MockCalendarControls",
     });
-    const calendarViewDate = screen.getByRole("button", {
-      name: "MockCalendarView",
-    });
 
     expect(calendarControls).toHaveTextContent(mockToday.toDateString());
-    expect(calendarViewDate).toHaveTextContent(mockToday.toDateString());
+    expect(calendarControls).toHaveTextContent("00:00:00");
   });
 
   it("Should set calendar dates with current calendar month by default", async () => {
@@ -214,6 +215,7 @@ describe("Calendar", () => {
     expect(calendarControlsBtn).toHaveTextContent(
       new Date("2026-11-04").toDateString(),
     );
+    expect(calendarControlsBtn).toHaveTextContent("00:00:00");
   });
 
   it("Should not update calendar dates when new selected date chosen with a valid date of same month", async () => {
@@ -435,5 +437,30 @@ describe("Calendar", () => {
 
     await user.click(createEventCancelBtn);
     expect(modal).not.toBeInTheDocument();
+  });
+
+  it("Should clear content from the create event form when modal is closed and then re-opened", async () => {
+    const user = userEvent.setup();
+
+    render(<Calendar />);
+
+    const openModalBtn = screen.getByRole("button", {
+      name: "MockCalendarControls-OpenModal",
+    });
+    await user.click(openModalBtn);
+
+    const modalInput = screen.getByRole("textbox", { name: "Form field:" });
+    const modalBtn = screen.getByTestId("mockModal");
+
+    await user.type(modalInput, "Testing clear form");
+    expect(modalInput).toHaveValue("Testing clear form");
+    await user.click(modalBtn);
+    expect(modalBtn).not.toBeInTheDocument();
+
+    await user.click(openModalBtn);
+    const refreshedModalInput = screen.getByRole("textbox", {
+      name: "Form field:",
+    });
+    expect(refreshedModalInput).toHaveValue("");
   });
 });

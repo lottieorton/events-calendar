@@ -1,6 +1,10 @@
-import { useForm, type Resolver } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { fn } from "storybook/test";
-import { eventFormSchema, type EventFormValues } from "./schema";
+import {
+  eventFormSchema,
+  type EventFormInput,
+  type EventFormValues,
+} from "./schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import EventForm from "./EventForm";
@@ -22,15 +26,18 @@ interface FormWrapperProps {
   submitLabel: string;
   isSubmitting?: boolean;
   showErrors?: boolean;
+  defaultValues?: Partial<EventFormInput>;
 }
 
 function FormWrapper({
   submitLabel,
   isSubmitting = false,
   showErrors = false,
+  defaultValues,
 }: FormWrapperProps) {
-  const methods = useForm<EventFormValues>({
-    resolver: zodResolver(eventFormSchema) as Resolver<EventFormValues>,
+  const methods = useForm<EventFormInput, any, EventFormValues>({
+    resolver: zodResolver(eventFormSchema),
+    defaultValues: defaultValues,
   });
 
   useEffect(() => {
@@ -88,4 +95,30 @@ export const Empty: Story = {};
 
 export const WithValidationErrors: Story = {
   args: { showErrors: true },
+};
+
+export const WithDateTimeStartAndEnd: Story = {
+  args: {
+    defaultValues: {
+      title: "Default title",
+      calendarId: 1,
+      description: "Default description",
+      startAt: "2026-11-23T13:00",
+      endAt: "2026-11-23T14:00",
+      isAllDay: false,
+    },
+  },
+};
+
+export const WithDateStartAndEnd: Story = {
+  args: {
+    defaultValues: {
+      title: "Default title",
+      calendarId: 1,
+      description: "Default description",
+      startAt: "2026-11-23",
+      endAt: "2026-11-23",
+      isAllDay: true,
+    },
+  },
 };

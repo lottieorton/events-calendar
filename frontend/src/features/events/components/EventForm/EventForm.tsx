@@ -4,13 +4,15 @@ import InputField from "../../../../ui/components/Form/InputField/InputField";
 import SelectField from "../../../../ui/components/Form/SelectField/SelectField";
 import TextAreaField from "../../../../ui/components/Form/TextAreaField/TextAreaField";
 import TextButton from "../../../../ui/components/TextButton/TextButton";
-import type { EventFormValues } from "./schema";
+import type { EventFormInput, EventFormValues } from "./schema";
 import { useCalendars } from "../../../calendars/hooks/calendar-hooks";
 import Alert from "../../../../ui/components/Alert/Alert";
 import Spinner from "../../../../ui/components/Spinner/Spinner";
+import { getEndOfDay, getStartOfDay } from "../../../../lib/utils/date-utils";
+import { useEffect, useRef } from "react";
 
 interface EventFormProps {
-  methods: UseFormReturn<EventFormValues>;
+  methods: UseFormReturn<EventFormInput, any, EventFormValues>;
   submitLabel: string;
   onSubmit: (formData: EventFormValues) => Promise<void>;
   onCancel: () => void;
@@ -33,15 +35,48 @@ export default function EventForm({
     };
   });
 
-  const onFormSubmit: SubmitHandler<EventFormValues> = async (d) => {
-    await onSubmit(d);
-  };
-
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = methods;
+
+  const isAllDay = methods.watch("isAllDay");
+
+  const timeCache = useRef({
+    start: "00:00",
+    end: "01:00",
+  });
+
+  useEffect(() => {
+    const { startAt: currentStart, endAt: currentEnd } = methods.getValues();
+
+    if (typeof currentStart !== "string" || typeof currentEnd !== "string")
+      return;
+
+    if (isAllDay && currentStart.includes("T")) {
+      timeCache.current.start = currentStart.split("T")[1];
+      timeCache.current.end = currentEnd.split("T")[1];
+      methods.setValue("startAt", currentStart.split("T")[0]);
+      methods.setValue("endAt", currentEnd.split("T")[0]);
+    } else if (!isAllDay && !currentStart.includes("T")) {
+      methods.setValue("startAt", `${currentStart}T${timeCache.current.start}`);
+      methods.setValue("endAt", `${currentEnd}T${timeCache.current.end}`);
+    }
+  }, [isAllDay, methods]);
+
+  const onFormSubmit: SubmitHandler<EventFormValues> = async (d) => {
+    const finalData = { ...d };
+
+    if (d.isAllDay) {
+      const startAtDateTime = getStartOfDay(new Date(finalData.startAt));
+      const endAtDateTime = getEndOfDay(new Date(finalData.endAt));
+      finalData.startAt = startAtDateTime;
+      finalData.endAt = endAtDateTime;
+    }
+
+    await onSubmit(finalData);
+  };
 
   if (isError) {
     return (
@@ -85,7 +120,7 @@ export default function EventForm({
         />
         <InputField
           id="startAt"
-          type="datetime-local"
+          type={isAllDay ? "date" : "datetime-local"}
           label="Start At"
           required
           registration={register("startAt")}
@@ -93,7 +128,7 @@ export default function EventForm({
         />
         <InputField
           id="endAt"
-          type="datetime-local"
+          type={isAllDay ? "date" : "datetime-local"}
           label="End At"
           required
           registration={register("endAt")}
