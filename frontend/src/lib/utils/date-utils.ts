@@ -1,5 +1,6 @@
 import {
   addDays,
+  addHours,
   areIntervalsOverlapping,
   eachDayOfInterval,
   endOfDay,
@@ -25,6 +26,10 @@ export const toISODateString = (date: Date): string => {
   return format(date, "yyyy-MM-dd");
 };
 
+export const toDateTimeString = (date: Date): string => {
+  return format(date, "yyyy-MM-dd'T'HH:mm");
+};
+
 export const toMonthYear = (date: Date): string => {
   return format(date, "MMMM yyyy");
 };
@@ -39,6 +44,14 @@ export const isMonthSame = (date: Date, selectedDate: Date): boolean => {
 
 export const getStartOfDay = (date: Date): Date => {
   return startOfDay(date);
+};
+
+export const getEndOfDay = (date: Date): Date => {
+  return endOfDay(date);
+};
+
+export const addNumHours = (date: Date, numOfHours: number): Date => {
+  return addHours(date, numOfHours);
 };
 
 export const getCalendarDates = (date: Date): Date[] => {

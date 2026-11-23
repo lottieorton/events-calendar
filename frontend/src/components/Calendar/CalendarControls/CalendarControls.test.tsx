@@ -31,6 +31,7 @@ vi.mock("../../../lib/utils/date-utils", () => ({
 
 describe("CalendarControls", () => {
   const mockUpdateDates = vi.fn();
+  const mockOpenModal = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -43,6 +44,7 @@ describe("CalendarControls", () => {
       <CalendarControls
         selectedDate={new Date("11/03/2026")}
         updateDates={mockUpdateDates}
+        openModal={mockOpenModal}
       />,
     );
 
@@ -58,6 +60,7 @@ describe("CalendarControls", () => {
       <CalendarControls
         selectedDate={new Date("11/03/2026")}
         updateDates={mockUpdateDates}
+        openModal={mockOpenModal}
       />,
     );
 
@@ -75,6 +78,7 @@ describe("CalendarControls", () => {
       <CalendarControls
         selectedDate={new Date("11/03/2026")}
         updateDates={mockUpdateDates}
+        openModal={mockOpenModal}
       />,
     );
 
@@ -90,6 +94,7 @@ describe("CalendarControls", () => {
       <CalendarControls
         selectedDate={new Date("11/03/2026")}
         updateDates={mockUpdateDates}
+        openModal={mockOpenModal}
       />,
     );
 
@@ -107,6 +112,7 @@ describe("CalendarControls", () => {
       <CalendarControls
         selectedDate={new Date("11/03/2026")}
         updateDates={mockUpdateDates}
+        openModal={mockOpenModal}
       />,
     );
 
@@ -125,6 +131,7 @@ describe("CalendarControls", () => {
       <CalendarControls
         selectedDate={new Date("11/01/2026")}
         updateDates={mockUpdateDates}
+        openModal={mockOpenModal}
       />,
     );
 
@@ -139,5 +146,21 @@ describe("CalendarControls", () => {
     expect(dateCalled.getDate()).toBe(expectedToday.getDate());
     expect(dateCalled.getMonth()).toBe(expectedToday.getMonth());
     expect(dateCalled.getFullYear()).toBe(expectedToday.getFullYear());
+  });
+
+  it("Should call openModal when New Event button clicked", async () => {
+    const user = userEvent.setup();
+    render(
+      <CalendarControls
+        selectedDate={new Date("11/01/2026")}
+        updateDates={mockUpdateDates}
+        openModal={mockOpenModal}
+      />,
+    );
+
+    const openModalBtn = screen.getByRole("button", { name: "New Event" });
+    await user.click(openModalBtn);
+
+    expect(mockOpenModal).toHaveBeenCalledOnce();
   });
 });

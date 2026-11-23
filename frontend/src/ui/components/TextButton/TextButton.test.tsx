@@ -44,4 +44,19 @@ describe("TextButton", () => {
     expect(mockOnSubmit).not.toHaveBeenCalled();
     expect(mockOnClick).toHaveBeenCalled();
   });
+
+  it("Should be disabled when property provided", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <TextButton disabled onClick={mockOnClick}>
+        Click me
+      </TextButton>,
+    );
+
+    const textBtn = screen.getByRole("button", { name: "Click me" });
+    await user.click(textBtn);
+    expect(textBtn).toHaveAttribute("disabled");
+    expect(mockOnClick).not.toHaveBeenCalled();
+  });
 });

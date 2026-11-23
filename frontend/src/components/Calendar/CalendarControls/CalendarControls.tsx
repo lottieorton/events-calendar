@@ -1,5 +1,9 @@
 import IconButton from "../../../ui/components/IconButton/IconButton";
-import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faAngleLeft,
+  faAngleRight,
+  faPlus,
+} from "@fortawesome/free-solid-svg-icons";
 import TextButton from "../../../ui/components/TextButton/TextButton";
 import DateForm from "../../DateForm/DateForm";
 import {
@@ -8,15 +12,18 @@ import {
   stringToDate,
   toMonthYear,
 } from "../../../lib/utils/date-utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface CalendarControlsProps {
   selectedDate: Date;
   updateDates: (date: Date) => void;
+  openModal: () => void;
 }
 
 export default function CalendarControls({
   selectedDate,
   updateDates,
+  openModal,
 }: CalendarControlsProps) {
   return (
     <div className="flex flex-col gap-2">
@@ -42,9 +49,17 @@ export default function CalendarControls({
           selectedDate={selectedDate}
           onChange={(dateString) => updateDates(stringToDate(dateString))}
         />
-        <TextButton variant="secondary" onClick={() => updateDates(new Date())}>
-          Today
-        </TextButton>
+        <div className="flex flex-wrap justify-end items-center gap-3">
+          <TextButton onClick={openModal}>
+            <FontAwesomeIcon icon={faPlus} /> New Event
+          </TextButton>
+          <TextButton
+            variant="secondary"
+            onClick={() => updateDates(new Date())}
+          >
+            Today
+          </TextButton>
+        </div>
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ const meta = {
   args: {
     selectedDate: new Date("11/03/2027"),
     updateDates: fn(),
+    openModal: fn(),
   },
 } satisfies Meta<typeof CalendarControls>;
 

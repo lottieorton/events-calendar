@@ -1,12 +1,15 @@
 import {
+  addNumHours,
   doesEventOverlapDate,
   getCalendarDates,
+  getEndOfDay,
   getStartOfDay,
   getStartOfNextMonth,
   getStartOfPrevMonth,
   isDaySame,
   isMonthSame,
   stringToDate,
+  toDateTimeString,
   toISODateString,
   toMonthYear,
 } from "./date-utils";
@@ -38,6 +41,14 @@ describe("toISODateString", () => {
     const testDate = new Date(2026, 10, 5);
     const result = toISODateString(testDate);
     expect(result).toBe("2026-11-05");
+  });
+});
+
+describe("toDateTimeString", () => {
+  it("Should format a date as yyyy-MM-dd'T'HH:mm", () => {
+    const testDate = new Date(2026, 10, 5, 12, 0, 0);
+    const result = toDateTimeString(testDate);
+    expect(result).toBe("2026-11-05T12:00");
   });
 });
 
@@ -86,6 +97,7 @@ describe("getStartOfDay", () => {
     expect(result.getMonth()).toBe(10);
     expect(result.getDate()).toBe(5);
     expect(result.getHours()).toBe(0);
+    expect(result.getMinutes()).toBe(0);
     expect(result.getSeconds()).toBe(0);
     expect(result.getMilliseconds()).toBe(0);
   });
@@ -94,6 +106,77 @@ describe("getStartOfDay", () => {
     const testDate = new Date(2026, 10, 5, 0, 0, 0);
     const result = getStartOfDay(testDate);
     expect(result).toEqual(testDate);
+  });
+});
+
+describe("getEndOfDay", () => {
+  it("Should return the end of the day for a given date", () => {
+    const testDate = new Date(2026, 10, 5, 13, 5, 30);
+    const result = getEndOfDay(testDate);
+
+    expect(result.getFullYear()).toBe(2026);
+    expect(result.getMonth()).toBe(10);
+    expect(result.getDate()).toBe(5);
+    expect(result.getHours()).toBe(23);
+    expect(result.getMinutes()).toBe(59);
+    expect(result.getSeconds()).toBe(59);
+    expect(result.getMilliseconds()).toBe(999);
+  });
+
+  it("Should return the same value if the day provided is the end of the day", () => {
+    const testDate = new Date(2026, 10, 5, 23, 59, 59, 999);
+    const result = getEndOfDay(testDate);
+    expect(result).toEqual(testDate);
+  });
+});
+
+describe("addNumHours", () => {
+  it("Should add a positive number of hours to a date", () => {
+    const testDate = new Date(2026, 10, 5, 13, 0, 0);
+    const result = addNumHours(testDate, 10);
+
+    expect(result.getFullYear()).toBe(2026);
+    expect(result.getMonth()).toBe(10);
+    expect(result.getDate()).toBe(5);
+    expect(result.getHours()).toBe(23);
+  });
+
+  it("Should add a decimal number of hours to a date", () => {
+    const testDate = new Date(2026, 10, 5, 13, 0, 0);
+    const result = addNumHours(testDate, 2.5);
+
+    expect(result.getFullYear()).toBe(2026);
+    expect(result.getMonth()).toBe(10);
+    expect(result.getDate()).toBe(5);
+    expect(result.getHours()).toBe(15);
+    expect(result.getMinutes()).toBe(30);
+  });
+
+  it("Should add a negative number of hours to a date", () => {
+    const testDate = new Date(2026, 10, 5, 13, 0, 0);
+    const result = addNumHours(testDate, -5);
+
+    expect(result.getFullYear()).toBe(2026);
+    expect(result.getMonth()).toBe(10);
+    expect(result.getDate()).toBe(5);
+    expect(result.getHours()).toBe(8);
+  });
+
+  it("Should make no change when adding 0 hours to a date", () => {
+    const testDate = new Date(2026, 10, 5, 13, 0, 0);
+    const result = addNumHours(testDate, 0);
+
+    expect(result).toEqual(testDate);
+  });
+
+  it("Should change day when adding hours rolls over to a future date", () => {
+    const testDate = new Date(2026, 10, 5, 13, 0, 0);
+    const result = addNumHours(testDate, 70);
+
+    expect(result.getFullYear()).toBe(2026);
+    expect(result.getMonth()).toBe(10);
+    expect(result.getDate()).toBe(8);
+    expect(result.getHours()).toBe(11);
   });
 });
 
