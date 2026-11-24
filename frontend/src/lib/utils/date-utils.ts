@@ -5,6 +5,7 @@ import {
   eachDayOfInterval,
   endOfDay,
   endOfMonth,
+  endOfWeek,
   format,
   isMonday,
   isSameDay,
@@ -15,6 +16,7 @@ import {
   previousMonday,
   startOfDay,
   startOfMonth,
+  startOfWeek,
   subDays,
 } from "date-fns";
 
@@ -32,6 +34,14 @@ export const toDateTimeString = (date: Date): string => {
 
 export const toMonthYear = (date: Date): string => {
   return format(date, "MMMM yyyy");
+};
+
+export const toDayOfWeekDate = (date: Date): string => {
+  return format(date, "eeee, d MMMM");
+};
+
+export const toTime = (date: Date): string => {
+  return format(date, "h:mmaaa");
 };
 
 export const isDaySame = (date: Date, selectedDate: Date): boolean => {
@@ -54,6 +64,10 @@ export const addNumHours = (date: Date, numOfHours: number): Date => {
   return addHours(date, numOfHours);
 };
 
+export const addNumDays = (date: Date, numofDays: number): Date => {
+  return addDays(date, numofDays);
+};
+
 export const getCalendarDates = (date: Date): Date[] => {
   let startOfCalendar = startOfMonth(date);
   let endOfCalendar = endOfMonth(date);
@@ -69,6 +83,13 @@ export const getCalendarDates = (date: Date): Date[] => {
   });
 
   return dates;
+};
+
+export const getWeekDates = (date: Date): Date[] => {
+  return eachDayOfInterval({
+    start: startOfWeek(date, { weekStartsOn: 1 }),
+    end: endOfWeek(date, { weekStartsOn: 1 }),
+  });
 };
 
 export const getStartOfPrevMonth = (date: Date): Date => {

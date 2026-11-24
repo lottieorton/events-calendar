@@ -82,6 +82,7 @@ const meta = {
       );
     },
   ],
+  tags: ["autodocs"],
   args: {
     submitLabel: "Create Event",
   },

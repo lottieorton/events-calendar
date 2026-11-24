@@ -61,7 +61,7 @@ describe("events-api", () => {
 
   const mockFormData = {
     title: "Hair cut",
-    description: "Go to the salon to get this sorted",
+    description: "Go to the salon for a cut and blowdry",
     calendarId: 1,
     startAt: new Date(2026, 10, 5, 10, 0, 0),
     endAt: new Date(2026, 10, 5, 10, 30, 0),

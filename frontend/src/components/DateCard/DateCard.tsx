@@ -41,7 +41,7 @@ export default function DateCard({
       className={`font-main flex flex-col relative group items-center md:border md:border-border p-2 text-sm text-center gap-2 ${variantClasses[variant].card} rounded-xl cursor-pointer hover:bg-bright-pink md:rounded-none md:items-start md:w-full md:aspect-square md:text-left lg:aspect-card 3xl:text-xl overflow-hidden`}
     >
       <p
-        className={`flex items-center justify-center rounded-full w-7 h-7 3xl:w-9 3xl:h-9 ${variant === "selected" ? selectedNum : ""}`}
+        className={`flex shrink-0 items-center justify-center rounded-full w-7 h-7 3xl:w-9 3xl:h-9 ${variant === "selected" ? selectedNum : ""}`}
       >
         {date.getDate()}
       </p>
@@ -49,7 +49,7 @@ export default function DateCard({
         {events.slice(0, 3).map((e) => {
           return (
             <div
-              className={`${calendarVariantClasses[e.calendar.color].iconColor} rounded-full h-1.5 w-1.5`}
+              className={`${calendarVariantClasses[e.calendar.color].dotColor} rounded-full h-1.5 w-1.5`}
               key={e.id}
               aria-label="event-icon"
             />

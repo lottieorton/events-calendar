@@ -1,4 +1,5 @@
 import {
+  addNumDays,
   addNumHours,
   doesEventOverlapDate,
   getCalendarDates,
@@ -6,12 +7,15 @@ import {
   getStartOfDay,
   getStartOfNextMonth,
   getStartOfPrevMonth,
+  getWeekDates,
   isDaySame,
   isMonthSame,
   stringToDate,
   toDateTimeString,
+  toDayOfWeekDate,
   toISODateString,
   toMonthYear,
+  toTime,
 } from "./date-utils";
 
 describe("stringToDate", () => {
@@ -57,6 +61,52 @@ describe("toMonthYear", () => {
     const testDate = new Date(2026, 10, 5);
     const result = toMonthYear(testDate);
     expect(result).toBe("November 2026");
+  });
+});
+
+describe("toDayOfWeekDate", () => {
+  it("Should format a date with day of the week, day and full month", () => {
+    const testDate = new Date(2026, 10, 15);
+    const result = toDayOfWeekDate(testDate);
+    expect(result).toBe("Sunday, 15 November");
+  });
+
+  it("Should format a single digit date without 0 prepended", () => {
+    const testDate = new Date(2026, 1, 4);
+    const result = toDayOfWeekDate(testDate);
+    expect(result).toBe("Wednesday, 4 February");
+  });
+});
+
+describe("toTime", () => {
+  it("Should format a morning date with am appended", () => {
+    const testDate = new Date(2026, 10, 5, 10, 0, 0);
+    const result = toTime(testDate);
+    expect(result).toBe("10:00am");
+  });
+
+  it("Should format a single digit time without prepending 0", () => {
+    const testDate = new Date(2026, 10, 5, 8, 0, 0);
+    const result = toTime(testDate);
+    expect(result).toBe("8:00am");
+  });
+
+  it("Should format an afternoon date with 12hr clock", () => {
+    const testDate = new Date(2026, 10, 5, 17, 0, 0);
+    const result = toTime(testDate);
+    expect(result).toBe("5:00pm");
+  });
+
+  it("Should format a mid-hour date with minutes", () => {
+    const testDate = new Date(2026, 10, 5, 14, 30, 0);
+    const result = toTime(testDate);
+    expect(result).toBe("2:30pm");
+  });
+
+  it("Should format the start of the day to be midnight", () => {
+    const testDate = new Date(2026, 10, 5);
+    const result = toTime(testDate);
+    expect(result).toBe("12:00am");
   });
 });
 
@@ -180,6 +230,45 @@ describe("addNumHours", () => {
   });
 });
 
+describe("addNumDays", () => {
+  it("Should add a positive number of days to a date", () => {
+    const testDate = new Date(2026, 10, 5, 13, 0, 0);
+    const result = addNumDays(testDate, 10);
+
+    expect(result.getFullYear()).toBe(2026);
+    expect(result.getMonth()).toBe(10);
+    expect(result.getDate()).toBe(15);
+    expect(result.getHours()).toBe(13);
+  });
+
+  it("Should add a negative number of days to a date", () => {
+    const testDate = new Date(2026, 10, 5, 13, 0, 0);
+    const result = addNumDays(testDate, -5);
+
+    expect(result.getFullYear()).toBe(2026);
+    expect(result.getMonth()).toBe(9);
+    expect(result.getDate()).toBe(31);
+    expect(result.getHours()).toBe(13);
+  });
+
+  it("Should make no change when adding 0 days to a date", () => {
+    const testDate = new Date(2026, 10, 5, 13, 0, 0);
+    const result = addNumDays(testDate, 0);
+
+    expect(result).toEqual(testDate);
+  });
+
+  it("Should change year when adding days rolls over to a future date", () => {
+    const testDate = new Date(2026, 11, 31, 12, 0, 0);
+    const result = addNumDays(testDate, 4);
+
+    expect(result.getFullYear()).toBe(2027);
+    expect(result.getMonth()).toBe(0);
+    expect(result.getDate()).toBe(4);
+    expect(result.getHours()).toBe(12);
+  });
+});
+
 describe("getCalendarDates", () => {
   it("Should return list including the given date", () => {
     const testDate = new Date(2026, 10, 5);
@@ -252,6 +341,62 @@ describe("getCalendarDates", () => {
 
     expect(lastDay.getDate()).toBeGreaterThanOrEqual(28);
     expect(lastDay.getDay()).toBe(0);
+  });
+});
+
+describe("getWeekDates", () => {
+  it("Should return list including the given date", () => {
+    const testDate = new Date(2026, 10, 5);
+    const result = getWeekDates(testDate);
+    const currentDateIndex = result.findIndex(
+      (d) => d.toDateString() == testDate.toDateString(),
+    );
+
+    expect(currentDateIndex).toBeGreaterThan(-1);
+  });
+
+  it("Should return a sequential week of dates including the given date", () => {
+    const testDate = new Date(2026, 10, 5);
+    const result = getWeekDates(testDate);
+
+    expect(result).toHaveLength(7);
+    for (let i = 1; i < result.length; i++) {
+      const expectedNextDay = new Date(result[i - 1]);
+      expectedNextDay.setDate(expectedNextDay.getDate() + 1);
+      expect(result[i]).toEqual(expectedNextDay);
+    }
+  });
+
+  it("Should have the first value returned being a Monday of the returned week", () => {
+    const testDate = new Date(2026, 10, 5);
+    const result = getWeekDates(testDate);
+
+    expect(result[0].getDay()).toBe(1);
+  });
+
+  it("Should have the first value returned being the given date if it is a Monday", () => {
+    const testDate = new Date(2026, 10, 9);
+    const result = getWeekDates(testDate);
+
+    expect(result[0].getDay()).toBe(1);
+    expect(result[0]).toEqual(testDate);
+  });
+
+  it("Should have the last value returned being the Sunday of the returned week", () => {
+    const testDate = new Date(2026, 10, 5);
+    const result = getWeekDates(testDate);
+    const lastDate = result[result.length - 1];
+
+    expect(lastDate.getDay()).toBe(0);
+  });
+
+  it("Should have the last value returned being given date if it is a Sunday", () => {
+    const testDate = new Date(2026, 10, 8);
+    const result = getWeekDates(testDate);
+    const lastDate = result[result.length - 1];
+
+    expect(lastDate.getDay()).toBe(0);
+    expect(lastDate).toEqual(testDate);
   });
 });
 

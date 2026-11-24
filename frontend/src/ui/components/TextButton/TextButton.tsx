@@ -4,7 +4,7 @@ type TextButtonVariant = "primary" | "secondary";
 
 const variantClasses: Record<TextButtonVariant, string> = {
   primary:
-    "text-stone-50 bg-secondary hover:bg-secondary/90 disabled:bg-secondary/50",
+    "text-white bg-secondary hover:bg-secondary/90 disabled:bg-secondary/50",
   secondary:
     "border border-border text-secondary bg-stone-50 hover:bg-stone-100 disabled:bg-gray-200",
 };

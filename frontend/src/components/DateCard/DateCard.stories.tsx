@@ -76,7 +76,7 @@ export const AdjacentWithEvent: Story = {
 
 export const Variants: Story = {
   render: () => (
-    <div className="flex w-100 gap-1">
+    <div className="flex w-200 gap-1">
       <DateCard
         variant="current"
         date={new Date("11/01/2026")}

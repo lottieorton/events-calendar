@@ -5,7 +5,7 @@ import type { DateWithEvents } from "../../../features/events/types";
 interface CalendarViewProps {
   calendarDates: DateWithEvents[];
   selectedDate: Date;
-  updateDates: (date: Date) => void;
+  updateDates: (date: Date, updateView?: "week" | "month") => void;
 }
 
 export default function CalendarView({
@@ -43,7 +43,7 @@ export default function CalendarView({
               variant={variant}
               date={c.day}
               key={c.day.toDateString()}
-              onClick={() => updateDates(c.day)}
+              onClick={() => updateDates(c.day, "week")}
               events={c.events}
             />
           );
