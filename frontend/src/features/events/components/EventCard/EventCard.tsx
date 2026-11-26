@@ -12,12 +12,14 @@ interface EventCardProps {
   event: Event;
   selectedDate: Date;
   onUpdate: (event: Event) => void;
+  onDelete: (event: Event) => void;
 }
 
 export default function EventCard({
   event,
   selectedDate,
   onUpdate,
+  onDelete,
 }: EventCardProps) {
   return (
     <article className="flex justify-between items-center bg-stone-50 py-2 px-3 rounded-xl border border-border">
@@ -46,7 +48,7 @@ export default function EventCard({
           <FontAwesomeIcon icon={faPencil} />
         </button>
         <button
-          onClick={() => {}}
+          onClick={() => onDelete(event)}
           className="text-red-600 cursor-pointer text-md 3xl:text-xl"
           aria-label="Delete Event"
         >

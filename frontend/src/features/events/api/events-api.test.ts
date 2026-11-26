@@ -1,6 +1,11 @@
 import { ApiError } from "../../../lib/utils/api-error";
 import { makeEvent, makeEventResponse } from "../../../lib/utils/test-utils";
-import { createEvent, getAllEvents, updateEvent } from "./events-api";
+import {
+  createEvent,
+  deleteEvent,
+  getAllEvents,
+  updateEvent,
+} from "./events-api";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -245,6 +250,43 @@ describe("events-api", () => {
 
       await expect(updateEvent(1, mockFormData)).rejects.toThrow(
         new Error("Unable to update event"),
+      );
+    });
+  });
+
+  describe("deleteEvent", () => {
+    it("Should return true on successful delete", async () => {
+      vi.spyOn(window, "fetch").mockResolvedValueOnce({
+        ok: true,
+        status: 204,
+      } as Response);
+
+      const result = await deleteEvent(1);
+
+      expect(fetch).toHaveBeenCalledWith(`${API_URL}/events/1`, {
+        method: "DELETE",
+      });
+      expect(result).toEqual(true);
+    });
+
+    it("Should throw an ApiError when !response.ok", async () => {
+      vi.spyOn(window, "fetch").mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+      } as Response);
+
+      await expect(deleteEvent(1)).rejects.toThrow(
+        new ApiError("Failed to delete event", 404),
+      );
+    });
+
+    it("Should throw an error when delete fails", async () => {
+      vi.spyOn(window, "fetch").mockRejectedValueOnce(
+        new Error("Something went wrong"),
+      );
+
+      await expect(deleteEvent(1)).rejects.toThrow(
+        new Error("Something went wrong"),
       );
     });
   });
