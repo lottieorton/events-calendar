@@ -6,6 +6,7 @@ import IconButton from "../../../ui/components/IconButton/IconButton";
 import Modal from "../../../ui/components/Modal/Modal";
 import { useState } from "react";
 import UpdateEventForm from "../../../features/events/components/UpdateEventForm/UpdateEventForm";
+import DeleteEventCheck from "../../../features/events/components/DeleteEventCheck/DeleteEventCheck";
 
 interface DayViewProps {
   events: Event[];
@@ -23,6 +24,7 @@ export default function DayView({
 }: DayViewProps) {
   const [modal, setModal] = useState<ModalState>(null);
   const onUpdate = (event: Event) => setModal({ type: "update", event: event });
+  const onDelete = (event: Event) => setModal({ type: "delete", event: event });
   const closeModal = () => setModal(null);
 
   return (
@@ -50,6 +52,7 @@ export default function DayView({
               selectedDate={selectedDate}
               key={e.id}
               onUpdate={onUpdate}
+              onDelete={onDelete}
             />
           );
         })
@@ -61,6 +64,19 @@ export default function DayView({
       >
         {modal?.event && (
           <UpdateEventForm
+            event={modal.event}
+            onSuccess={closeModal}
+            onCancel={closeModal}
+          />
+        )}
+      </Modal>
+      <Modal
+        open={modal?.type === "delete"}
+        title="Delete Event"
+        onClose={closeModal}
+      >
+        {modal?.event && (
+          <DeleteEventCheck
             event={modal.event}
             onSuccess={closeModal}
             onCancel={closeModal}

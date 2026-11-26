@@ -14,6 +14,7 @@ const meta = {
     }),
     selectedDate: new Date(2026, 10, 24),
     onUpdate: fn(),
+    onDelete: fn(),
   },
   decorators: [
     (Story) => (
@@ -76,6 +77,7 @@ export const Variants: Story = {
         })}
         selectedDate={new Date(2026, 10, 24)}
         onUpdate={() => fn()}
+        onDelete={() => fn()}
       />
       <EventCard
         event={makeEvent({
@@ -84,6 +86,7 @@ export const Variants: Story = {
         })}
         selectedDate={new Date(2026, 10, 24)}
         onUpdate={() => fn()}
+        onDelete={() => fn()}
       />
       <EventCard
         event={makeEvent({
@@ -93,6 +96,7 @@ export const Variants: Story = {
         })}
         selectedDate={new Date(2026, 10, 24)}
         onUpdate={() => fn()}
+        onDelete={() => fn()}
       />
       <EventCard
         event={makeEvent({
@@ -101,6 +105,7 @@ export const Variants: Story = {
         })}
         selectedDate={new Date(2026, 10, 24)}
         onUpdate={() => fn()}
+        onDelete={() => fn()}
       />
     </div>
   ),

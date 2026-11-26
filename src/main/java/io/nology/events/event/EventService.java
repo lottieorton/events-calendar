@@ -70,6 +70,15 @@ public class EventService {
 
         return Optional.of(event);
     }
+    
+    public boolean deleteById(Long id) {
+        Optional<Event> result = this.findById(id);
+        if(result.isEmpty()) { 
+            return false;
+        }
+        this.repo.delete(result.get());
+        return true;
+    }
 
     private Calendar resolveCalendar(Long id) {
         Optional<Calendar> returnedCalendar = this.calendarService.findById(id);

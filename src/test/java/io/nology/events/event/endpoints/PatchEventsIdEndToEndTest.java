@@ -77,6 +77,17 @@ public class PatchEventsIdEndToEndTest extends BaseEndToEndTest {
     }
 
     @Test 
+    public void updateById_InvalidIdType_ReturnsBadRequest () {
+        UpdateEventRequest data = new UpdateEventRequest(null, null, null, null, null, null);
+        
+        given().contentType(ContentType.JSON).body(data)
+        .when().patch("/events/a")
+        .then().statusCode(HttpStatus.BAD_REQUEST.value())
+        .body("error", equalTo("Bad Request"))
+        .body(matchesJsonSchemaInClasspath("schemas/api-error-schema.json"));
+    }
+
+    @Test 
     public void updateById_NoBody_ReturnsBadRequest () {
         var opts = EventTestFactoryOptions.builder().build();
         Event event = factory.create(opts);

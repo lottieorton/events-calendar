@@ -40,15 +40,18 @@ vi.mock("../../../features/events/components/EventCard/EventCard", () => {
       event,
       selectedDate,
       onUpdate,
+      onDelete,
     }: {
       event: Event;
       selectedDate: Date;
       onUpdate: (event: Event) => void;
+      onDelete: (event: Event) => void;
     }) => {
       return (
         <div>
           <h2>{`${event.title}`}</h2>
           <button onClick={() => onUpdate(event)}>Open Update Modal</button>
+          <button onClick={() => onDelete(event)}>Open Delete Modal</button>
           <div data-testid="eventCardDate">{`${selectedDate}`}</div>
         </div>
       );
@@ -79,6 +82,33 @@ vi.mock(
             Success
           </button>
           <button data-testid="mockUpdateEventFormCancel" onClick={onCancel}>
+            Cancel
+          </button>
+        </div>
+      ),
+    };
+  },
+);
+
+vi.mock(
+  "../../../features/events/components/DeleteEventCheck/DeleteEventCheck",
+  () => {
+    return {
+      default: ({
+        event,
+        onSuccess,
+        onCancel,
+      }: {
+        event: Event;
+        onSuccess: () => void;
+        onCancel: () => void;
+      }) => (
+        <div>
+          <div data-testid="delete-event">{event.title}</div>
+          <button data-testid="mockDeleteCheckSuccess" onClick={onSuccess}>
+            Delete
+          </button>
+          <button data-testid="mockDeleteCheckCancel" onClick={onCancel}>
             Cancel
           </button>
         </div>
@@ -179,8 +209,10 @@ describe("Day View", () => {
       />,
     );
 
-    const eventCard = screen.getByRole("button", { name: "Open Update Modal" });
-    await user.click(eventCard);
+    const openUpdateModal = screen.getByRole("button", {
+      name: "Open Update Modal",
+    });
+    await user.click(openUpdateModal);
 
     const updateModal = screen.getByTestId("mockModal");
     const updateEventForm = screen.getByTestId("update-event");
@@ -204,10 +236,13 @@ describe("Day View", () => {
       />,
     );
 
-    const eventCard = screen.getByRole("button", { name: "Open Update Modal" });
-    await user.click(eventCard);
+    const openUpdateModal = screen.getByRole("button", {
+      name: "Open Update Modal",
+    });
+    await user.click(openUpdateModal);
 
     const updateModal = screen.getByTestId("mockModal");
+    expect(updateModal).toHaveTextContent("Update Event");
     await user.click(updateModal);
 
     expect(updateModal).not.toBeInTheDocument();
@@ -229,11 +264,13 @@ describe("Day View", () => {
       />,
     );
 
-    const eventCard = screen.getByRole("button", { name: "Open Update Modal" });
-    await user.click(eventCard);
+    const openUpdateModal = screen.getByRole("button", {
+      name: "Open Update Modal",
+    });
+    await user.click(openUpdateModal);
 
     const updateModal = screen.getByTestId("mockModal");
-    expect(updateModal).toBeInTheDocument();
+    expect(updateModal).toHaveTextContent("Update Event");
     const updateEventFormSuccessBtn = screen.getByTestId(
       "mockUpdateEventFormSuccess",
     );
@@ -258,11 +295,13 @@ describe("Day View", () => {
       />,
     );
 
-    const eventCard = screen.getByRole("button", { name: "Open Update Modal" });
-    await user.click(eventCard);
+    const openUpdateModal = screen.getByRole("button", {
+      name: "Open Update Modal",
+    });
+    await user.click(openUpdateModal);
 
     const updateModal = screen.getByTestId("mockModal");
-    expect(updateModal).toBeInTheDocument();
+    expect(updateModal).toHaveTextContent("Update Event");
     const updateEventFormCancelBtn = screen.getByTestId(
       "mockUpdateEventFormCancel",
     );
@@ -287,14 +326,16 @@ describe("Day View", () => {
       />,
     );
 
-    const eventCard = screen.getByRole("button", { name: "Open Update Modal" });
-    await user.click(eventCard);
+    const openUpdateModal = screen.getByRole("button", {
+      name: "Open Update Modal",
+    });
+    await user.click(openUpdateModal);
 
     const updateModal = screen.getByTestId("mockModal");
     const updateModalTitleField = screen.getByRole("textbox", {
       name: "Title:",
     });
-    expect(updateModal).toBeInTheDocument();
+    expect(updateModal).toHaveTextContent("Update Event");
     const updateEventFormCancelBtn = screen.getByTestId(
       "mockUpdateEventFormCancel",
     );
@@ -303,11 +344,124 @@ describe("Day View", () => {
     expect(updateModalTitleField).toHaveValue("hello");
     await user.click(updateEventFormCancelBtn);
     expect(updateModal).not.toBeInTheDocument();
-    await user.click(eventCard);
+    await user.click(openUpdateModal);
 
     const reopenedUpdateModalTitleField = screen.getByRole("textbox", {
       name: "Title:",
     });
     expect(reopenedUpdateModalTitleField).toHaveValue("");
+  });
+
+  it("Should open delete modal when onDelete called from an EventCard", async () => {
+    const user = userEvent.setup();
+    const mockEvents = [
+      makeEvent({
+        title: "Go to the gym",
+      }),
+    ];
+
+    render(
+      <DayView
+        events={mockEvents}
+        selectedDate={new Date(2026, 10, 24)}
+        openCreateModal={mockOpenCreateModal}
+      />,
+    );
+
+    const openDeleteModal = screen.getByRole("button", {
+      name: "Open Delete Modal",
+    });
+    await user.click(openDeleteModal);
+
+    const deleteModal = screen.getByTestId("mockModal");
+    const deleteCheck = screen.getByTestId("delete-event");
+    expect(deleteModal).toHaveTextContent("Delete Event");
+    expect(deleteCheck).toHaveTextContent("Go to the gym");
+  });
+
+  it("Should close delete modal when called from modal", async () => {
+    const user = userEvent.setup();
+    const mockEvents = [
+      makeEvent({
+        title: "Go to the gym",
+      }),
+    ];
+
+    render(
+      <DayView
+        events={mockEvents}
+        selectedDate={new Date(2026, 10, 24)}
+        openCreateModal={mockOpenCreateModal}
+      />,
+    );
+
+    const openDeleteModalBtn = screen.getByRole("button", {
+      name: "Open Delete Modal",
+    });
+    await user.click(openDeleteModalBtn);
+
+    const deleteModal = screen.getByTestId("mockModal");
+    expect(deleteModal).toHaveTextContent("Delete Event");
+    await user.click(deleteModal);
+
+    expect(deleteModal).not.toBeInTheDocument();
+  });
+
+  it("Should close delete modal when onSuccess called from DeleteEventCheck", async () => {
+    const user = userEvent.setup();
+    const mockEvents = [
+      makeEvent({
+        title: "Go to the gym",
+      }),
+    ];
+
+    render(
+      <DayView
+        events={mockEvents}
+        selectedDate={new Date(2026, 10, 24)}
+        openCreateModal={mockOpenCreateModal}
+      />,
+    );
+
+    const openDeleteModal = screen.getByRole("button", {
+      name: "Open Delete Modal",
+    });
+    await user.click(openDeleteModal);
+
+    const deleteModal = screen.getByTestId("mockModal");
+    expect(deleteModal).toHaveTextContent("Delete Event");
+    const deleteSuccessBtn = screen.getByTestId("mockDeleteCheckSuccess");
+    await user.click(deleteSuccessBtn);
+
+    expect(deleteModal).not.toBeInTheDocument();
+  });
+
+  it("Should close delete modal when onCancel called from DeleteEventCheck", async () => {
+    const user = userEvent.setup();
+    const mockEvents = [
+      makeEvent({
+        title: "Go to the gym",
+      }),
+    ];
+
+    render(
+      <DayView
+        events={mockEvents}
+        selectedDate={new Date(2026, 10, 24)}
+        openCreateModal={mockOpenCreateModal}
+      />,
+    );
+
+    const openDeleteModal = screen.getByRole("button", {
+      name: "Open Delete Modal",
+    });
+    await user.click(openDeleteModal);
+
+    const deleteModal = screen.getByTestId("mockModal");
+    expect(deleteModal).toHaveTextContent("Delete Event");
+    const deleteCancelBtn = screen.getByTestId("mockDeleteCheckCancel");
+    await user.click(deleteCancelBtn);
+
+    expect(deleteModal).not.toBeInTheDocument();
   });
 });

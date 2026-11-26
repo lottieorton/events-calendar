@@ -4,8 +4,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
 import java.time.Instant;
@@ -176,5 +178,26 @@ public class EventServiceTest {
         assertThrows(UnprocessableContentException.class, () -> this.eventService.updateById(1L, data));
         verify(this.calendarService).findById(2L);
         verify(this.repo, never()).saveAndFlush(any(Event.class));
+    }
+
+    @Test 
+    public void deleteById_WhenEventExists_DeletesAndReturnsTrue() {
+        Event event = new Event("Invalid", "To delete", new Calendar(), Instant.parse("2026-11-26T20:00:00Z"), Instant.parse("2026-11-26T21:00:00Z"), false);
+        when(this.repo.findById(1L)).thenReturn(Optional.of(event));
+
+        boolean result = this.eventService.deleteById(1L);
+
+        assertTrue(result);
+        verify(this.repo).delete(event);
+    }
+
+    @Test 
+    public void deleteById_WhenEventDoesNotExist_ReturnsFalse() {
+        when(this.repo.findById(1L)).thenReturn(Optional.empty());
+
+        boolean result = this.eventService.deleteById(1L);
+
+        assertFalse(result);
+        verify(this.repo, never()).delete(any(Event.class));
     }
 }

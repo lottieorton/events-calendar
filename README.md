@@ -142,14 +142,14 @@ VITE_API_URL=http://localhost:8080
 
 ## Features
 
-- **Calendar Navigation:** Clear monthly calendar period navigation and date selection.
-- **Event Management (IN PROGRESS):** Create, view, update, and delete events.
+- **Calendar Navigation:** Clear monthly calendar period navigation, with week view and daily view upon date selection for full daily event visibility.
+- **Event Management:** Create, view, update, and delete events.
 - **Calendar Management (IN PROGRESS):** Create, view, update, and delete custom calendars.
 
 ## Future Goals
 
 - **Calendar Implementation:** Implement CRUD operations for managing custom calendars to have associated events
-- **Event Implementation:** Implement CRUD operations for custom events
+- **Playwright tests:** Add suites of Playwright tests for full end-to-end app testing
 - **Authentication:** Create users entity and have users login to access only their own personal calendars and events
 - **Calendar/Event sharing:** Enable sharing of events and/or calendars between multiple logged in users.
 
@@ -228,6 +228,16 @@ VITE_API_URL=http://localhost:8080
 
 - Implemented isAllDay checked logic for the date fields in event form, additionally upadting schema logic
 - Added default values functionality and logic to create event form
+
+**24/11/2026:** Day and week calendar views
+
+- Added calendar week view with selected day event card list
+- Implemented functionality to switch between month and week calendar views
+
+**26/11/2026:** Update and delete events
+
+- Implemented update event full-stack functionality with testing
+- Implemented delete event full-stack functionality with testing
 
 ---
 

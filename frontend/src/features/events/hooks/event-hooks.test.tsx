@@ -1,14 +1,25 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createEvent, getAllEvents, updateEvent } from "../api/events-api";
+import {
+  createEvent,
+  deleteEvent,
+  getAllEvents,
+  updateEvent,
+} from "../api/events-api";
 import { act, type ReactNode } from "react";
 import { makeEvent } from "../../../lib/utils/test-utils";
 import { renderHook, waitFor } from "@testing-library/react";
-import { useCreateEvent, useEvents, useUpdateEvent } from "./event-hooks";
+import {
+  useCreateEvent,
+  useDeleteEvent,
+  useEvents,
+  useUpdateEvent,
+} from "./event-hooks";
 
 vi.mock("../api/events-api", () => ({
   getAllEvents: vi.fn(),
   createEvent: vi.fn(),
   updateEvent: vi.fn(),
+  deleteEvent: vi.fn(),
 }));
 
 const createWrapper = () => {
@@ -269,6 +280,95 @@ describe("event-hooks", () => {
           "Could not update event",
         );
         expect(updateEvent).toHaveBeenCalledOnce();
+        expect(getAllEvents).toHaveBeenCalledOnce();
+      });
+    });
+  });
+
+  describe("useDeleteEvent", () => {
+    it("Should return true on successful delete", async () => {
+      vi.mocked(deleteEvent).mockResolvedValueOnce(true);
+
+      const { result } = renderHook(() => useDeleteEvent(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current.isPending).toBe(false);
+      expect(result.current.isSuccess).toBe(false);
+      act(() => {
+        result.current.mutate(1);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+        expect(deleteEvent).toHaveBeenCalledOnce();
+        expect(deleteEvent).toHaveBeenCalledWith(1);
+        expect(result.current.data).toEqual(true);
+        expect(result.current.isPending).toBe(false);
+      });
+    });
+
+    it("Should cause useEvents to be refetched on successful delete", async () => {
+      vi.mocked(getAllEvents)
+        .mockResolvedValueOnce([mockEvent])
+        .mockResolvedValueOnce([]);
+      vi.mocked(deleteEvent).mockResolvedValueOnce(true);
+
+      const wrapper = createWrapper();
+      const { result } = renderHook(
+        () => ({
+          query: useEvents(),
+          mutation: useDeleteEvent(),
+        }),
+        { wrapper },
+      );
+
+      await waitFor(() => {
+        expect(result.current.query.data).toEqual([mockEvent]);
+      });
+      expect(getAllEvents).toHaveBeenCalledOnce();
+      act(() => {
+        result.current.mutation.mutate(1);
+      });
+
+      await waitFor(() => {
+        expect(result.current.mutation.isSuccess).toBe(true);
+        expect(deleteEvent).toHaveBeenCalledOnce();
+        expect(getAllEvents).toHaveBeenCalledTimes(2);
+        expect(result.current.query.data).toEqual([]);
+      });
+    });
+
+    it("Should return isError when deleting event errors", async () => {
+      vi.mocked(getAllEvents).mockResolvedValueOnce(mockEvents);
+      vi.mocked(deleteEvent).mockRejectedValueOnce(
+        new Error("Could not delete event"),
+      );
+
+      const wrapper = createWrapper();
+      const { result } = renderHook(
+        () => ({
+          query: useEvents(),
+          mutation: useDeleteEvent(),
+        }),
+        { wrapper },
+      );
+
+      await waitFor(() => {
+        expect(result.current.query.data).toEqual(mockEvents);
+      });
+      expect(getAllEvents).toHaveBeenCalledOnce();
+      act(() => {
+        result.current.mutation.mutate(1);
+      });
+
+      await waitFor(() => {
+        expect(result.current.mutation.isSuccess).toBe(false);
+        expect(result.current.mutation.isError).toBe(true);
+        expect(result.current.mutation.error?.message).toBe(
+          "Could not delete event",
+        );
+        expect(deleteEvent).toHaveBeenCalledOnce();
         expect(getAllEvents).toHaveBeenCalledOnce();
       });
     });

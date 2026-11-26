@@ -64,3 +64,14 @@ export const updateEvent = async (
   }
   return event;
 };
+
+export const deleteEvent = async (id: number): Promise<boolean> => {
+  const response = await fetch(`${API_URL}/events/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw await toApiError(response, "Failed to delete event");
+  }
+  return true;
+};
