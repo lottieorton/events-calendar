@@ -49,7 +49,7 @@ export default function CalendarControls({
           selectedDate={selectedDate}
           onChange={(dateString) => updateDates(stringToDate(dateString))}
         />
-        <div className="flex flex-wrap justify-end items-center gap-3">
+        <div className="flex flex-wrap justify-end items-center gap-2">
           <TextButton onClick={openModal}>
             <FontAwesomeIcon icon={faPlus} /> New Event
           </TextButton>

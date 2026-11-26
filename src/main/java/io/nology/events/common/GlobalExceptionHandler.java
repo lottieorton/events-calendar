@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import io.nology.events.common.dtos.ApiErrorResponse;
 import io.nology.events.common.exceptions.RestException;
-import io.nology.events.common.exceptions.ValidationException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @ControllerAdvice 
@@ -35,9 +34,9 @@ public class GlobalExceptionHandler {
                 errors.computeIfAbsent(field, key -> new ArrayList<>()).add(message);
         }
         
-        ValidationException customValidationEx = new ValidationException(errors);
-        
-        return this.handleRestException(customValidationEx, req);
+        ApiErrorResponse response = ApiErrorResponse.of(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI(), errors);
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

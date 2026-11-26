@@ -39,3 +39,28 @@ export const createEvent = async (
   }
   return event;
 };
+
+export const updateEvent = async (
+  id: number,
+  formData: EventFormValues,
+): Promise<Event> => {
+  const response = await fetch(`${API_URL}/events/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(formData),
+  });
+
+  if (!response.ok) {
+    throw await toApiError(response, "Failed to update event");
+  }
+
+  const data: EventResponse = await response.json();
+  const event = toEvent(data);
+
+  if (!event) {
+    throw new Error("Failed to map event response");
+  }
+  return event;
+};

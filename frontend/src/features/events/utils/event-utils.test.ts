@@ -1,6 +1,6 @@
 import { makeEvent } from "../../../lib/utils/test-utils";
 import type { Event } from "../types";
-import { addEventsToCalendar } from "./event-utils";
+import { addEventsToCalendar, getTimeLabels, orderEvents } from "./event-utils";
 
 describe("addEventsToCalendar", () => {
   const mockCalendarDates = [
@@ -97,5 +97,156 @@ describe("addEventsToCalendar", () => {
     result.forEach((r) => {
       expect(r.events.length).toBe(0);
     });
+  });
+});
+
+describe("orderEvents", () => {
+  it("Should order non-allDay events chronologically", () => {
+    const mockEvents = [
+      makeEvent({
+        id: 1,
+        startAt: new Date(2026, 10, 17, 17, 0, 0),
+        endAt: new Date(2026, 10, 17, 19, 0, 0),
+        isAllDay: false,
+      }),
+      makeEvent({
+        id: 2,
+        startAt: new Date(2026, 10, 16, 15, 0, 0),
+        endAt: new Date(2026, 10, 16, 19, 0, 0),
+        isAllDay: false,
+      }),
+      makeEvent({
+        id: 3,
+        startAt: new Date(2026, 10, 17, 10, 0, 0),
+        endAt: new Date(2026, 10, 17, 20, 0, 0),
+        isAllDay: false,
+      }),
+    ];
+
+    const result = orderEvents(mockEvents);
+    expect(result.length).toBe(3);
+    expect(result[0].id).toBe(2);
+    expect(result[1].id).toBe(3);
+    expect(result[2].id).toBe(1);
+  });
+
+  it("Should order allDay events to be at the start of the array", () => {
+    const mockEvents = [
+      makeEvent({
+        id: 1,
+        startAt: new Date(2026, 10, 16, 17, 0, 0),
+        endAt: new Date(2026, 10, 17, 19, 0, 0),
+        isAllDay: false,
+      }),
+      makeEvent({
+        id: 2,
+        startAt: new Date(2026, 10, 18, 23, 0, 0),
+        endAt: new Date(2026, 10, 18, 23, 59, 59, 999),
+        isAllDay: true,
+      }),
+      makeEvent({
+        id: 3,
+        startAt: new Date(2026, 10, 16, 15, 0, 0),
+        endAt: new Date(2026, 10, 16, 19, 0, 0),
+        isAllDay: false,
+      }),
+      makeEvent({
+        id: 4,
+        startAt: new Date(2026, 10, 17, 23, 0, 0),
+        endAt: new Date(2026, 10, 17, 23, 59, 59, 999),
+        isAllDay: true,
+      }),
+    ];
+
+    const result = orderEvents(mockEvents);
+    expect(result.length).toBe(4);
+    expect(result[0].id).toBe(4);
+    expect(result[1].id).toBe(2);
+    expect(result[2].id).toBe(3);
+    expect(result[3].id).toBe(1);
+  });
+
+  it("Should keep events that start at the same time in the same order", () => {
+    const mockEvents = [
+      makeEvent({
+        id: 1,
+        startAt: new Date(2026, 10, 16, 17, 0, 0),
+        endAt: new Date(2026, 10, 17, 19, 0, 0),
+        isAllDay: false,
+      }),
+      makeEvent({
+        id: 2,
+        startAt: new Date(2026, 10, 16, 17, 0, 0),
+        endAt: new Date(2026, 10, 17, 18, 0, 0),
+        isAllDay: false,
+      }),
+    ];
+
+    const result = orderEvents(mockEvents);
+    expect(result.length).toBe(2);
+    expect(result[0].id).toBe(1);
+    expect(result[1].id).toBe(2);
+  });
+
+  it("Should return an empty array when an empty array provided", () => {
+    const result = orderEvents([]);
+    expect(result.length).toBe(0);
+  });
+});
+
+describe("getTimeLabels", () => {
+  it("Should return start and end times for an event that occurs on this day only", () => {
+    const mockEvent = makeEvent({
+      startAt: new Date(2026, 10, 24, 8, 0, 0),
+      endAt: new Date(2026, 10, 24, 17, 0, 0),
+    });
+
+    expect(getTimeLabels(mockEvent, new Date(2026, 10, 24))).toBe(
+      "8:00am - 5:00pm",
+    );
+  });
+
+  it("Should return All-day for an all day event", () => {
+    const mockEvent = makeEvent({
+      startAt: new Date(2026, 10, 24, 0, 0, 0),
+      endAt: new Date(2026, 10, 24, 23, 59, 59),
+      isAllDay: true,
+    });
+
+    expect(getTimeLabels(mockEvent, new Date(2026, 10, 24))).toBe("All-day");
+  });
+
+  it("Should return All-day for a non-allDay event that spans the entire given day", () => {
+    const mockEvent = makeEvent({
+      startAt: new Date(2026, 10, 23, 12, 0, 0),
+      endAt: new Date(2026, 10, 25, 9, 0, 0),
+      isAllDay: false,
+    });
+
+    expect(getTimeLabels(mockEvent, new Date(2026, 10, 24))).toBe("All-day");
+  });
+
+  it("Should return 'onwards' for a non-allDay event that ends after the given date", () => {
+    const mockEvent = makeEvent({
+      startAt: new Date(2026, 10, 24, 11, 0, 0),
+      endAt: new Date(2026, 10, 25, 9, 0, 0),
+      isAllDay: false,
+    });
+
+    expect(getTimeLabels(mockEvent, new Date(2026, 10, 24))).toBe(
+      "11:00am - onwards",
+    );
+  });
+
+  it("Should return 'Ends at' for a non-allDay event that starts before the given date", () => {
+    const mockEvent = makeEvent({
+      startAt: new Date(2026, 10, 24, 11, 0, 0),
+      endAt: new Date(2026, 10, 25, 9, 0, 0),
+      isAllDay: false,
+    });
+
+    expect(getTimeLabels(mockEvent, new Date(2026, 10, 25))).toBe(
+      "Ends at 9:00am",
+    );
   });
 });

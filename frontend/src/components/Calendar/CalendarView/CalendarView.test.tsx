@@ -36,9 +36,9 @@ describe("CalendarView", () => {
   ];
 
   const mockCalendarDates: DateWithEvents[] = [
-    { day: new Date("10/31/2026"), events: mockEvents },
-    { day: new Date("11/01/2026"), events: [] },
-    { day: new Date("11/02/2026"), events: [] },
+    { day: new Date(2026, 9, 31), events: mockEvents },
+    { day: new Date(2026, 10, 1), events: [] },
+    { day: new Date(2026, 10, 2), events: [] },
   ];
   const mockSelectedDate = new Date("11/01/2026");
   const mockUpdateDates = vi.fn();
@@ -61,7 +61,7 @@ describe("CalendarView", () => {
     expect(events[2]).toHaveTextContent("Events: 0");
   });
 
-  it("Should call onClick with day of card", async () => {
+  it("Should call onClick with day of card and updateView as week when called in DateCard", async () => {
     const user = userEvent.setup();
     render(
       <CalendarView
@@ -76,7 +76,10 @@ describe("CalendarView", () => {
 
     expect(dateCards).toHaveLength(3);
     expect(mockUpdateDates).toHaveBeenCalledOnce();
-    expect(mockUpdateDates).toHaveBeenCalledWith(mockCalendarDates[0].day);
+    expect(mockUpdateDates).toHaveBeenCalledWith(
+      mockCalendarDates[0].day,
+      "week",
+    );
   });
 
   it("Should correctly calculate variant as selected", () => {

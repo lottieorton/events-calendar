@@ -13,7 +13,7 @@ export const makeEvent = (overrides: Partial<Event> = {}): Event => {
   return {
     id: 1,
     title: "Hair cut",
-    description: "Go to the salon to get this sorted",
+    description: "Go to the salon for a cut and blowdry",
     calendar: {
       id: 1,
       name: "Personal",
@@ -75,7 +75,7 @@ export const makeEventResponse = (
   return {
     id: 1,
     title: "Hair cut",
-    description: "Go to the salon to get this sorted",
+    description: "Go to the salon for a cut and blowdry",
     calendar: {
       id: 1,
       name: "Personal",

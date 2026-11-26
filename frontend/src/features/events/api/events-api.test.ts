@@ -1,6 +1,6 @@
 import { ApiError } from "../../../lib/utils/api-error";
 import { makeEvent, makeEventResponse } from "../../../lib/utils/test-utils";
-import { createEvent, getAllEvents } from "./events-api";
+import { createEvent, getAllEvents, updateEvent } from "./events-api";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -61,7 +61,7 @@ describe("events-api", () => {
 
   const mockFormData = {
     title: "Hair cut",
-    description: "Go to the salon to get this sorted",
+    description: "Go to the salon for a cut and blowdry",
     calendarId: 1,
     startAt: new Date(2026, 10, 5, 10, 0, 0),
     endAt: new Date(2026, 10, 5, 10, 30, 0),
@@ -136,7 +136,7 @@ describe("events-api", () => {
   });
 
   describe("createEvent", () => {
-    it("Should return an event on successful fetch", async () => {
+    it("Should return an event on successful create", async () => {
       vi.spyOn(window, "fetch").mockResolvedValueOnce({
         ok: true,
         status: 201,
@@ -188,6 +188,63 @@ describe("events-api", () => {
 
       await expect(createEvent(mockFormData)).rejects.toThrow(
         "Network connection failed",
+      );
+    });
+  });
+
+  describe("updateEvent", () => {
+    it("Should return an event on successful update", async () => {
+      vi.spyOn(window, "fetch").mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => mockEventResponse,
+      } as Response);
+
+      const result = await updateEvent(1, mockFormData);
+
+      expect(fetch).toHaveBeenCalledWith(`${API_URL}/events/1`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(mockFormData),
+      });
+      expect(result).toEqual(mockEvent);
+    });
+
+    it("Should throw an ApiError when !response.ok", async () => {
+      vi.spyOn(window, "fetch").mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        json: async () => mockErrorResponse,
+      } as Response);
+
+      await expect(updateEvent(1, mockFormData)).rejects.toThrow(
+        new ApiError("Something went wrong with the fetch", 400),
+      );
+    });
+
+    it("Should throw an error when fails to convert response to an event", async () => {
+      const mockInvalidEventResponse = makeEventResponse({
+        startAt: "invalid",
+      });
+
+      vi.spyOn(window, "fetch").mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => mockInvalidEventResponse,
+      } as Response);
+
+      await expect(updateEvent(1, mockFormData)).rejects.toThrow(
+        new Error("Failed to map event response"),
+      );
+    });
+
+    it("Should throw an error when update fails", async () => {
+      vi.spyOn(window, "fetch").mockRejectedValueOnce(
+        new Error("Unable to update event"),
+      );
+
+      await expect(updateEvent(1, mockFormData)).rejects.toThrow(
+        new Error("Unable to update event"),
       );
     });
   });

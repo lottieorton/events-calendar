@@ -4,7 +4,6 @@ import CreateEventForm from "./CreateEventForm";
 import userEvent from "@testing-library/user-event";
 import { render, screen } from "@testing-library/react";
 import { useCreateEvent } from "../../hooks/event-hooks";
-import { toast } from "react-toastify";
 
 const mockFormData = {
   title: "title",
@@ -72,12 +71,6 @@ vi.mock("../../hooks/event-hooks", () => ({
   useCreateEvent: vi.fn(),
 }));
 
-vi.mock("react-toastify", () => ({
-  toast: {
-    error: vi.fn(),
-  },
-}));
-
 describe("CreateEventForm", () => {
   const mockOnSuccess = vi.fn();
   const mockOnCancel = vi.fn();
@@ -97,10 +90,11 @@ describe("CreateEventForm", () => {
     vi.mocked(useCreateEvent).mockReturnValue({
       mutate: mockCreateEvent,
       isPending: false,
+      isError: false,
     } as any);
   });
 
-  it("Should call createEvent when onSuccess when called in Event Form", async () => {
+  it("Should call createEvent when onSubmit called in Event Form", async () => {
     const user = userEvent.setup();
 
     render(
@@ -111,34 +105,14 @@ describe("CreateEventForm", () => {
       />,
     );
 
-    const onSuccessBtn = screen.getByRole("button", { name: "MockSubmitForm" });
-    await user.click(onSuccessBtn);
+    const onSubmitBtn = screen.getByRole("button", { name: "MockSubmitForm" });
+    await user.click(onSubmitBtn);
 
-    expect(onSuccessBtn).toHaveTextContent("Create Event");
+    expect(onSubmitBtn).toHaveTextContent("Create Event");
     expect(mockCreateEvent).toHaveBeenCalledOnce();
     expect(mockCreateEvent).toHaveBeenCalledWith(mockFormData, {
-      onError: expect.any(Function),
       onSuccess: expect.any(Function),
     });
-  });
-
-  it("Should not call createEvent when submitting an invalid form", async () => {
-    const user = userEvent.setup();
-
-    render(
-      <CreateEventForm
-        onSuccess={mockOnSuccess}
-        onCancel={mockOnCancel}
-        selectedDate={mockSelectedDate}
-      />,
-    );
-
-    const onInvalidFormBtn = screen.getByRole("button", {
-      name: "MockInvalidSubmit",
-    });
-    await user.click(onInvalidFormBtn);
-
-    expect(mockCreateEvent).not.toHaveBeenCalled();
   });
 
   it("Should call onSuccess when create successful", async () => {
@@ -155,18 +129,19 @@ describe("CreateEventForm", () => {
       />,
     );
 
-    const onSuccessBtn = screen.getByRole("button", { name: "MockSubmitForm" });
-    await user.click(onSuccessBtn);
+    const onSubmitBtn = screen.getByRole("button", { name: "MockSubmitForm" });
+    await user.click(onSubmitBtn);
 
     expect(mockCreateEvent).toHaveBeenCalledOnce();
     expect(mockOnSuccess).toHaveBeenCalledOnce();
   });
 
-  it("Should render a toast message when create errors", async () => {
-    const user = userEvent.setup();
-    mockCreateEvent.mockImplementation((_variables, options) => {
-      options.onError(new Error("Oops something went wrong"));
-    });
+  it("Should render an Alert when create errors", () => {
+    vi.mocked(useCreateEvent).mockReturnValue({
+      mutate: mockCreateEvent,
+      isPending: false,
+      isError: true,
+    } as any);
 
     render(
       <CreateEventForm
@@ -176,32 +151,10 @@ describe("CreateEventForm", () => {
       />,
     );
 
-    const onSuccessBtn = screen.getByRole("button", { name: "MockSubmitForm" });
-    await user.click(onSuccessBtn);
-
-    expect(mockCreateEvent).toHaveBeenCalledOnce();
-    expect(toast.error).toHaveBeenCalledWith("Oops something went wrong");
-  });
-
-  it("Should render a toast message with default message when create errors without a message", async () => {
-    const user = userEvent.setup();
-    mockCreateEvent.mockImplementation((_variables, options) => {
-      options.onError(new Error());
-    });
-
-    render(
-      <CreateEventForm
-        onSuccess={mockOnSuccess}
-        onCancel={mockOnCancel}
-        selectedDate={mockSelectedDate}
-      />,
-    );
-
-    const onSuccessBtn = screen.getByRole("button", { name: "MockSubmitForm" });
-    await user.click(onSuccessBtn);
-
-    expect(mockCreateEvent).toHaveBeenCalledOnce();
-    expect(toast.error).toHaveBeenCalledWith("Unable to create this event");
+    expect(screen.getByText("Error creating event")).toBeInTheDocument();
+    expect(
+      screen.getByText("Please check the details and try again."),
+    ).toBeInTheDocument();
   });
 
   it("Should call onCancel when called in Event Form", async () => {

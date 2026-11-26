@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createEvent, getAllEvents } from "../api/events-api";
+import { createEvent, getAllEvents, updateEvent } from "../api/events-api";
 import type { Event } from "../types";
 import type { EventFormValues } from "../components/EventForm/schema";
 
@@ -17,6 +17,22 @@ export function useCreateEvent() {
 
   return useMutation<Event, Error, EventFormValues>({
     mutationFn: (formData) => createEvent(formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [EVENTS_KEY] });
+    },
+  });
+}
+
+interface UpdateEventPayload {
+  id: number;
+  formData: EventFormValues;
+}
+
+export function useUpdateEvent() {
+  const queryClient = useQueryClient();
+
+  return useMutation<Event, Error, UpdateEventPayload>({
+    mutationFn: ({ id, formData }) => updateEvent(id, formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [EVENTS_KEY] });
     },
