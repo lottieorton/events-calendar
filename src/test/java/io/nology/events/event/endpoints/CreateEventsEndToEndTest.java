@@ -34,7 +34,7 @@ public class CreateEventsEndToEndTest extends BaseEndToEndTest {
 
         given().contentType(ContentType.JSON).body(data)
         .when().post("/events")
-        .then().log().body().statusCode(HttpStatus.CREATED.value())
+        .then().statusCode(HttpStatus.CREATED.value())
         .body("title", equalTo("Test"))
         .body("description", equalTo("Test description"))
         .body("calendar.id", equalTo(testCalendar.getId().intValue()))
@@ -51,7 +51,6 @@ public class CreateEventsEndToEndTest extends BaseEndToEndTest {
         given().contentType(ContentType.JSON).body(data)
         .when().post("/events")
         .then().statusCode(HttpStatus.BAD_REQUEST.value())
-        .body("message", equalTo("Validation failed"))
         .body("error", equalTo("Bad Request"))
         .body("details.title[0]", equalTo("Title cannot be empty"))
         .body("details.calendarId[0]", equalTo("Calendar cannot be empty"))

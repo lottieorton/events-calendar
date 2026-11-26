@@ -7,11 +7,11 @@ import {
 } from "../EventForm/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCreateEvent } from "../../hooks/event-hooks";
-import { toast } from "react-toastify";
 import {
   addNumHours,
   toDateTimeString,
 } from "../../../../lib/utils/date-utils";
+import Alert from "../../../../ui/components/Alert/Alert";
 
 interface CreateEventFormProps {
   onSuccess: () => void;
@@ -41,27 +41,30 @@ export default function CreateEventForm({
     defaultValues: eventFormDefaults,
   });
 
-  const { mutate: createEvent, isPending } = useCreateEvent();
+  const { mutate: createEvent, isPending, isError } = useCreateEvent();
 
   const onSubmit = async (formData: EventFormValues) => {
     createEvent(formData, {
       onSuccess: () => {
         onSuccess();
       },
-      onError: (err) => {
-        const errorMsg = err.message || "Unable to create this event";
-        toast.error(errorMsg);
-      },
     });
   };
 
   return (
-    <EventForm
-      methods={methods}
-      submitLabel="Create Event"
-      onSubmit={onSubmit}
-      onCancel={onCancel}
-      isSubmitting={isPending}
-    />
+    <div>
+      {isError && (
+        <Alert variant="error" title="Error creating event">
+          Please check the details and try again.
+        </Alert>
+      )}
+      <EventForm
+        methods={methods}
+        submitLabel="Create Event"
+        onSubmit={onSubmit}
+        onCancel={onCancel}
+        isSubmitting={isPending}
+      />
+    </div>
   );
 }

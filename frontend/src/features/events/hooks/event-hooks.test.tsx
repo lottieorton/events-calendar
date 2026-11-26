@@ -1,13 +1,14 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createEvent, getAllEvents } from "../api/events-api";
+import { createEvent, getAllEvents, updateEvent } from "../api/events-api";
 import { act, type ReactNode } from "react";
 import { makeEvent } from "../../../lib/utils/test-utils";
 import { renderHook, waitFor } from "@testing-library/react";
-import { useCreateEvent, useEvents } from "./event-hooks";
+import { useCreateEvent, useEvents, useUpdateEvent } from "./event-hooks";
 
 vi.mock("../api/events-api", () => ({
   getAllEvents: vi.fn(),
   createEvent: vi.fn(),
+  updateEvent: vi.fn(),
 }));
 
 const createWrapper = () => {
@@ -175,6 +176,99 @@ describe("event-hooks", () => {
           "Could not create event",
         );
         expect(createEvent).toHaveBeenCalledOnce();
+        expect(getAllEvents).toHaveBeenCalledOnce();
+      });
+    });
+  });
+
+  describe("useUpdateEvent", () => {
+    it("Should return an event on successful update", async () => {
+      vi.mocked(updateEvent).mockResolvedValueOnce(mockEvent);
+      const mockData = { id: 1, formData: mockFormData };
+
+      const { result } = renderHook(() => useUpdateEvent(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current.isPending).toBe(false);
+      expect(result.current.isSuccess).toBe(false);
+      act(() => {
+        result.current.mutate(mockData);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+        expect(updateEvent).toHaveBeenCalledOnce();
+        expect(updateEvent).toHaveBeenCalledWith(
+          mockData.id,
+          mockData.formData,
+        );
+        expect(result.current.data).toEqual(mockEvent);
+        expect(result.current.isPending).toBe(false);
+      });
+    });
+
+    it("Should cause useEvents to be refetched on successful update", async () => {
+      vi.mocked(getAllEvents)
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce(mockEvents);
+      vi.mocked(updateEvent).mockResolvedValueOnce(mockEvent);
+      const mockData = { id: 1, formData: mockFormData };
+      const wrapper = createWrapper();
+      const { result } = renderHook(
+        () => ({
+          query: useEvents(),
+          mutation: useUpdateEvent(),
+        }),
+        { wrapper },
+      );
+
+      await waitFor(() => {
+        expect(result.current.query.data).toEqual([]);
+      });
+      expect(getAllEvents).toHaveBeenCalledOnce();
+      act(() => {
+        result.current.mutation.mutate(mockData);
+      });
+
+      await waitFor(() => {
+        expect(result.current.mutation.isSuccess).toBe(true);
+        expect(updateEvent).toHaveBeenCalledOnce();
+        expect(getAllEvents).toHaveBeenCalledTimes(2);
+        expect(result.current.query.data).toEqual(mockEvents);
+      });
+    });
+
+    it("Should return isError when updating event errors", async () => {
+      vi.mocked(getAllEvents).mockResolvedValueOnce(mockEvents);
+      vi.mocked(updateEvent).mockRejectedValueOnce(
+        new Error("Could not update event"),
+      );
+      const mockData = { id: 1, formData: mockFormData };
+      const wrapper = createWrapper();
+      const { result } = renderHook(
+        () => ({
+          query: useEvents(),
+          mutation: useUpdateEvent(),
+        }),
+        { wrapper },
+      );
+
+      await waitFor(() => {
+        expect(result.current.query.data).toEqual(mockEvents);
+      });
+      expect(getAllEvents).toHaveBeenCalledOnce();
+      act(() => {
+        result.current.mutation.mutate(mockData);
+      });
+
+      await waitFor(() => {
+        expect(result.current.mutation.isSuccess).toBe(false);
+        expect(result.current.mutation.isError).toBe(true);
+        expect(result.current.mutation.error?.message).toBe(
+          "Could not update event",
+        );
+        expect(updateEvent).toHaveBeenCalledOnce();
         expect(getAllEvents).toHaveBeenCalledOnce();
       });
     });

@@ -76,7 +76,6 @@ export default function Calendar() {
           <WeekCalendarControls
             selectedDate={selectedDate}
             updateDates={updateDates}
-            openModal={openModal}
           />
         ) : (
           <CalendarControls
@@ -101,7 +100,7 @@ export default function Calendar() {
         <DayView
           events={selectedDateEvents}
           selectedDate={selectedDate}
-          openModal={openModal}
+          openCreateModal={openModal}
         />
       )}
       <Modal open={isCreateModalOpen} title="Create Event" onClose={closeModal}>
