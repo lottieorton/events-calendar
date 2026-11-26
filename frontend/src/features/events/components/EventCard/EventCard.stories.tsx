@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import EventCard from "./EventCard";
 import { makeEvent } from "../../../../lib/utils/test-utils";
+import { fn } from "storybook/test";
 
 const meta = {
   title: "Events/EventCard",
@@ -12,6 +13,7 @@ const meta = {
       endAt: new Date(2026, 10, 24, 13, 30, 0),
     }),
     selectedDate: new Date(2026, 10, 24),
+    onUpdate: fn(),
   },
   decorators: [
     (Story) => (
@@ -73,6 +75,7 @@ export const Variants: Story = {
           endAt: new Date(2026, 10, 24, 13, 30, 0),
         })}
         selectedDate={new Date(2026, 10, 24)}
+        onUpdate={() => fn()}
       />
       <EventCard
         event={makeEvent({
@@ -80,6 +83,7 @@ export const Variants: Story = {
           isAllDay: true,
         })}
         selectedDate={new Date(2026, 10, 24)}
+        onUpdate={() => fn()}
       />
       <EventCard
         event={makeEvent({
@@ -88,6 +92,7 @@ export const Variants: Story = {
           calendar: { id: 1, name: "personal", color: "green" },
         })}
         selectedDate={new Date(2026, 10, 24)}
+        onUpdate={() => fn()}
       />
       <EventCard
         event={makeEvent({
@@ -95,6 +100,7 @@ export const Variants: Story = {
           endAt: new Date(2026, 10, 24, 9, 0, 0),
         })}
         selectedDate={new Date(2026, 10, 24)}
+        onUpdate={() => fn()}
       />
     </div>
   ),
